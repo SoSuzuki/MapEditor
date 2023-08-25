@@ -1,19 +1,16 @@
 #pragma once
 #include "Engine/GameObject.h"
-class Stage :
+#include "Engine/Camera.h"
+class Controller :
     public GameObject
 {
-private:
-    int hModel_;    //モデル番号
-    int** table_;		//フロアの座標
-    int width_, height_;//フロアのx,z座標
 
 public:
     //コンストラクタ
-    Stage(GameObject* parent);
+    Controller(GameObject* parent);
 
     //デストラクタ
-    ~Stage();
+    ~Controller();
 
     //初期化
     void Initialize() override;

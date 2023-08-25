@@ -2,7 +2,7 @@
 #include "Engine/Model.h"
 
 Stage::Stage(GameObject* parent)
-	:GameObject(parent, "Player"), hModel_(-1)
+	:GameObject(parent, "Stage"), hModel_(-1),width_(15),height_(15),table_(nullptr)
 {
 }
 
@@ -15,6 +15,9 @@ void Stage::Initialize()
 	//モデルデータのロード
 	hModel_ = Model::Load("Assets/BoxDefault.fbx");
 	assert(hModel_ >= 0);
+
+	Camera::SetPosition(XMFLOAT3(width_/2, 5.0f, -5.0f));
+	Camera::SetTarget(XMFLOAT3(width_ / 2, 0.0f, height_ / 2));
 }
 
 void Stage::Update()
@@ -23,8 +26,19 @@ void Stage::Update()
 
 void Stage::Draw()
 {
-	Model::SetTransform(hModel_, transform_);
-	Model::Draw(hModel_);
+	Transform blockTrans;	//なのでTransform型で新しく変数を作る必要がある
+	for (int x = 0; x < width_; x++)
+	{
+		for (int z = 0; z < height_; z++)
+		{
+			blockTrans.position_.x = x;
+			blockTrans.position_.z = z;
+
+			//int type = table_[x][z];
+			Model::SetTransform(hModel_, blockTrans);
+			Model::Draw(hModel_);
+		}
+	}
 }
 
 void Stage::Release()
