@@ -1,8 +1,9 @@
 #include "Stage.h"
+#include <string>
 #include "Engine/Model.h"
 
 Stage::Stage(GameObject* parent)
-	:GameObject(parent, "Stage"), hModel_(-1),width_(15),height_(15),table_(nullptr)
+	:GameObject(parent, "Stage"), hModel_{-1}
 {
 }
 
@@ -12,11 +13,28 @@ Stage::~Stage()
 
 void Stage::Initialize()
 {
-	//モデルデータのロード
-	hModel_ = Model::Load("Assets/BoxDefault.fbx");
-	assert(hModel_ >= 0);
+	std::string modelName[] = {
+		"BoxDefault.fbx",
+		"BoxBrick.fbx",
+		"BoxGrass.fbx",
+		"BoxSand.fbx",
+		"BoxWater.fbx"
+	};
+	std::string fname_base = "Assets/";
 
-	
+	//モデルデータのロード
+	//hModel_[0] = Model::Load("Assets/BoxDefault.fbx");
+
+	for (int i = 0; i < BLOCK_MAX; i++) {
+		hModel_[i] = Model::Load(fname_base + modelName[i]);
+		assert(hModel_[i] >= 0);
+	}
+	// tableにブロックのタイプをセット
+	for (int z = 0; z < Height; z++) {
+		for (int x = 0; x < Width; x++) {
+			table_[x][z] = hModel_[DEFAULT];
+		}
+	}
 
 }
 
@@ -26,17 +44,17 @@ void Stage::Update()
 
 void Stage::Draw()
 {
-	Transform blockTrans;	//なのでTransform型で新しく変数を作る必要がある
-	for (int x = 0; x < width_; x++)
+	for (int x = 0; x < Width; x++)
 	{
-		for (int z = 0; z < height_; z++)
+		for (int z = 0; z < Height; z++)
 		{
-			blockTrans.position_.x = x;
-			blockTrans.position_.z = z;
+			transform_.position_.x = x;
+			transform_.position_.z = z;
 
-			//int type = table_[x][z];
-			Model::SetTransform(hModel_, blockTrans);
-			Model::Draw(hModel_);
+			//Model::SetTransform(hModel_[BLOCK_TYPE::DEFAULT], BLOCK_TYPETrans);
+			//Model::Draw(hModel_[BLOCK_TYPE::DEFAULT]);
+			Model::SetTransform(hModel_[(x + z) % 5], transform_);
+			Model::Draw(hModel_[(x + z) % 5]);
 		}
 	}
 }

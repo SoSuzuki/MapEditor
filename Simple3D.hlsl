@@ -42,7 +42,7 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 	//法線を回転
 	normal = mul(normal, matNormal);
 
-	float4 light = float4( 1.0, 0.8, -1.5, 0);	//光源の向き（この座標から光源が"来る"）
+	float4 light = float4( 1.0, 2.0, -1.5, 0);	//光源の向き（この座標から光源が"来る"）
 	light = normalize(light);
 	outData.color = clamp(dot(normal, light), 0, 1);
 

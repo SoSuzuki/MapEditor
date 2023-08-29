@@ -1,12 +1,25 @@
 #pragma once
 #include "Engine/GameObject.h"
+
+namespace {
+    const int Width = 15, Height = 15;//フロアのx,z座標
+    enum BLOCK_TYPE {
+        DEFAULT = 0,
+        BRICK,
+        GRASS,
+        SAND,
+        WATER,
+        BLOCK_MAX,
+    };
+}
+
 class Stage :
     public GameObject
 {
 private:
-    int hModel_;    //モデル番号
-    int** table_;		//フロアの座標
-    int width_, height_;//フロアのx,z座標
+    int hModel_[BLOCK_MAX];    //モデル番号
+    int table_[Width][Height];		//フロアの座標
+    
 
 public:
     //コンストラクタ
