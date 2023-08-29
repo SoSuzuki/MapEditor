@@ -16,8 +16,8 @@ void Stage::Initialize()
 	hModel_ = Model::Load("Assets/BoxDefault.fbx");
 	assert(hModel_ >= 0);
 
-	Camera::SetPosition(XMFLOAT3(width_/2, 5.0f, -5.0f));
-	Camera::SetTarget(XMFLOAT3(width_ / 2, 0.0f, height_ / 2));
+	
+
 }
 
 void Stage::Update()

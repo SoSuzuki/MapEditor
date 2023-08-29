@@ -46,7 +46,7 @@ void Camera::SetTarget(XMVECTOR target)
 
 void Camera::SetTarget(XMFLOAT3 target)
 {
-	SetPosition(XMLoadFloat3(&target));
+	SetTarget(XMLoadFloat3(&target));
 }
 
 //ƒrƒ…[s—ñ‚ğæ“¾
