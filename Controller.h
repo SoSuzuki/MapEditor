@@ -4,7 +4,8 @@
 class Controller :
     public GameObject
 {
-
+private:
+    bool isDegOver;
 public:
     //コンストラクタ
     Controller(GameObject* parent);
