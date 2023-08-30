@@ -2,7 +2,7 @@
 #include "Engine/GameObject.h"
 
 namespace {
-    const int Width = 15, Height = 15;//フロアのx,z座標
+    const int xSize = 15, zSize = 15;//フロアのx,z座標
     enum BLOCK_TYPE {
         DEFAULT = 0,
         BRICK,
@@ -11,15 +11,21 @@ namespace {
         WATER,
         BLOCK_MAX,
     };
+
 }
 
 class Stage :
     public GameObject
 {
 private:
-    int hModel_[BLOCK_MAX];    //モデル番号
-    int table_[Width][Height];		//フロアの座標
+    int hModel_[BLOCK_MAX];     //モデル番号
+  //int table_[xSize * zSize];  //フロアの座標
     
+    struct Stack
+    {
+        BLOCK_TYPE bt;
+        int height;
+    }table_[xSize * zSize];
 
 public:
     //コンストラクタ
@@ -39,5 +45,11 @@ public:
 
     //開放
     void Release() override;
+
+
+
+    void SetBlock(int _x, int _z, BLOCK_TYPE _type);
+
+    void SetStackBlock(int _x, int _z, int _height);
 };
 

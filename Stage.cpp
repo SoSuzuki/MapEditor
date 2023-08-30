@@ -30,12 +30,11 @@ void Stage::Initialize()
 		assert(hModel_[i] >= 0);
 	}
 	// tableにブロックのタイプをセット
-	for (int z = 0; z < Height; z++) {
-		for (int x = 0; x < Width; x++) {
-			table_[x][z] = hModel_[DEFAULT];
+	for (int x = 0; x < xSize; x++) {
+		for (int z = 0; z < zSize; z++) {
+			SetBlock(x, z, DEFAULT);
 		}
 	}
-
 }
 
 void Stage::Update()
@@ -44,21 +43,38 @@ void Stage::Update()
 
 void Stage::Draw()
 {
-	for (int x = 0; x < Width; x++)
+	for (int x = 0; x < xSize; x++)
 	{
-		for (int z = 0; z < Height; z++)
+		for (int z = 0; z < zSize; z++)
 		{
 			transform_.position_.x = x;
 			transform_.position_.z = z;
+			
+			SetStackBlock(x, z, 3);
 
-			//Model::SetTransform(hModel_[BLOCK_TYPE::DEFAULT], BLOCK_TYPETrans);
-			//Model::Draw(hModel_[BLOCK_TYPE::DEFAULT]);
 			Model::SetTransform(hModel_[(x + z) % 5], transform_);
 			Model::Draw(hModel_[(x + z) % 5]);
+
+			for (int y = 0; y < table_[z * xSize + x].height; y++) {
+				transform_.position_.y = y;
+				Model::SetTransform(hModel_[(x + z) % 5], transform_);
+				Model::Draw(hModel_[(x + z) % 5]);
+			}
+		
 		}
 	}
 }
 
 void Stage::Release()
 {
+}
+
+void Stage::SetBlock(int _x, int _z, BLOCK_TYPE _type)
+{
+	table_[_z * xSize + _x].bt = _type;
+}
+
+void Stage::SetStackBlock(int _x, int _z, int _height)
+{
+	table_[_z * xSize + _x].height = _height;
 }
