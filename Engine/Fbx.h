@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <fbxsdk.h>
 #include <string>
+#include <vector>
 #include "Direct3D.h"
 #include "Transform.h"
 #include "Camera.h"
@@ -18,6 +19,7 @@ class Texture;
 
 class Fbx
 {
+private:
 	//マテリアル
 	struct MATERIAL
 	{
@@ -40,11 +42,15 @@ class Fbx
 		XMVECTOR normal;	//法線
 	};
 
+
+	VERTEX* pVertices_;
+	int** ppIndex_;
+
 	int vertexCount_;	//頂点数
 	int polygonCount_;	//ポリゴン数
 	int materialCount_;	//マテリアルの個数
-	//std::vector<int>indexCount_;
-	int* indexCount_;
+	std::vector<int>indexCount_;
+	//int* indexCount_;
 
 	ID3D11Buffer* pVertexBuffer_;
 	ID3D11Buffer** pIndexBuffer_;
@@ -53,25 +59,34 @@ class Fbx
 
 	Texture* pTexture_;
 
-public:
-
-	Fbx();
-	~Fbx();
-
-	HRESULT Load(std::string fileName);
-	void Draw(Transform& transform);
-	void Release();
-
 	void InitVertex(fbxsdk::FbxMesh* mesh);
 	void InitIndex(fbxsdk::FbxMesh* mesh);
 	void InitConstantBuffer();
 	void InitMaterial(fbxsdk::FbxNode* pNode);
 
-private:
-
 	//---------Draw関数から呼ばれる関数---------
-	void PassDataToCB(DirectX::XMMATRIX worldMatrix);	//コンスタントバッファに情報を渡す
-	void SetBufferToPipeline();
+	//void PassDataToCB(DirectX::XMMATRIX worldMatrix);	//コンスタントバッファに情報を渡す
+	//void SetBufferToPipeline();
 
+public:
+
+	Fbx();
+	~Fbx();
+
+	struct RayCastData
+	{
+		XMFLOAT4 start;
+		XMFLOAT4 dir;
+		bool hit;
+		float dist;
+
+		RayCastData() { dist = 99999.0f; }
+	};
+
+	HRESULT Load(std::string fileName);
+	void Draw(Transform& transform);
+	void Release();
+
+	void RayCast(RayCastData& _rayData);
 };
 

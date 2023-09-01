@@ -41,5 +41,5 @@ namespace Model
 	/// <summary>
 	/// ‘S‚Ä‚Ìƒ‚ƒfƒ‹‚ð‰ð•ú
 	/// </summary>
-	void AllRelease();
+	//void AllRelease();
 };

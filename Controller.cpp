@@ -21,6 +21,7 @@ void Controller::Initialize()
 
 void Controller::Update()
 {
+
 	if (Input::IsKey(DIK_LEFT)) {
 		transform_.rotate_.y -= 1.0f;
 	}
