@@ -5,8 +5,8 @@
 #include "Texture.h"
 #include "DirectXCollision.h"
 
-Fbx::Fbx() :vertexCount_(0), polygonCount_(0), materialCount_(0),indexCount_{0},
-pVertexBuffer_(nullptr), pIndexBuffer_(nullptr), pConstantBuffer_(nullptr), pTexture_(nullptr), pMaterialList_(nullptr)
+Fbx::Fbx() :vertexCount_(0), polygonCount_(0), materialCount_(0),
+pVertexBuffer_(nullptr), pIndexBuffer_(nullptr), pConstantBuffer_(nullptr), /*pTexture_(nullptr), */pMaterialList_(nullptr)
 {
 }
 
@@ -119,7 +119,7 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 //インデックスバッファ準備
 void Fbx::InitIndex(fbxsdk::FbxMesh* mesh)
 {
-	pIndexBuffer_ = new ID3D11Buffer * [materialCount_];
+	pIndexBuffer_ = new ID3D11Buffer*[materialCount_];
 
 	//int* index = new int[polygonCount_ * 3];
 
@@ -149,6 +149,7 @@ void Fbx::InitIndex(fbxsdk::FbxMesh* mesh)
 			}
 		}
 		indexCount_[i] = count;
+
 		D3D11_BUFFER_DESC   bd;
 		bd.Usage = D3D11_USAGE_DEFAULT;
 		bd.ByteWidth = sizeof(int) * polygonCount_ * 3;
@@ -237,7 +238,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 
 void Fbx::Draw(Transform& transform)
 {
-	Direct3D::SetShader(SHADER_3D);
+	Direct3D::SetShader(SHADER_TYPE::SHADER_3D);
 	transform.Calclation();//トランスフォームを計算
 	//コンスタントバッファに情報を渡す
 	for (int i = 0; i < materialCount_; i++)
@@ -256,29 +257,17 @@ void Fbx::Draw(Transform& transform)
 			cb.isTextured = pMaterialList_[i].pTexture != nullptr;
 		}
 
-
-
-
-
-
 		D3D11_MAPPED_SUBRESOURCE pdata;
 		Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
 		memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
 
-
-
 		Direct3D::pContext_->Unmap(pConstantBuffer_, 0);	//再開
-
-
 
 		//頂点バッファ、インデックスバッファ、コンスタントバッファをパイプラインにセット
 		//頂点バッファ
 		UINT stride = sizeof(VERTEX);
 		UINT offset = 0;
 		Direct3D::pContext_->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
-
-
-
 
 		// インデックスバッファーをセット
 		stride = sizeof(int);
@@ -305,13 +294,19 @@ void Fbx::Draw(Transform& transform)
 
 void Fbx::Release()
 {
+	delete[] ppIndex_;
+	delete[] pVertices_;
+	SAFE_RELEASE(pConstantBuffer_);
+
+	SAFE_DELETE(pIndexBuffer_);
+	SAFE_RELEASE(pVertexBuffer_);
 }
 
 void Fbx::RayCast(RayCastData& _rayData)
 {
 	for (int material = 0; material < materialCount_; material++)
 	{	
-		for (int poly = 0; poly < polygonCount_; poly++)
+		for (int poly = 0; poly < indexCount_[material] / 3; poly++)
 		{
 			int i0 = ppIndex_[material][poly * 3 + 0];
 			int i1 = ppIndex_[material][poly * 3 + 1];
