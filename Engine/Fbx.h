@@ -57,7 +57,7 @@ private:
 	ID3D11Buffer* pConstantBuffer_;
 	MATERIAL* pMaterialList_;
 
-	Texture* pTexture_;
+	//Texture* pTexture_;
 
 	void InitVertex(fbxsdk::FbxMesh* mesh);
 	void InitIndex(fbxsdk::FbxMesh* mesh);
