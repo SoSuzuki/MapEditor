@@ -26,7 +26,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
 {
 	Fbx* pFbx = new Fbx;
-	pFbx->Load("Assets/BoxBrick.fbx");
+	//pFbx->Load("Assets/BoxBrick.fbx");
 	Fbx::RayCastData data;
 	data.start = XMFLOAT4(0, 0, 0,0);
 	data.dir = XMFLOAT4(0, -1, 0, 0);
