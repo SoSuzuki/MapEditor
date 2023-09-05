@@ -9,6 +9,7 @@
 #include "DirectXCollision.h"
 
 #include "resource.h"
+#include "Stage.h"
 
 #pragma comment(lib, "winmm.lib")
 
@@ -35,7 +36,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	data.dir = XMFLOAT4(0, -1, 0, 0);
 	pFbx->RayCast(data);
 
-	int a;
+	int a;	// レイキャストチェック用
 
 	//ウィンドウクラス（設計図）を作成
 	WNDCLASSEX wc;	//このインスタンスに設計項目を詰め込む
@@ -97,7 +98,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	//Objectの初期化
 	pRootJob->Initialize();
 
+	// ダイアログボックスを作成
 	HWND hDlg = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, (DLGPROC)DialogProc);
+	//モーダルダイアログ版
+	// DialogBox(			);
 
 	//メッセージループ（何か起きるのを待つ）
 	MSG msg;
@@ -173,6 +177,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	return 0;
 }
 
+// WinAPIの仕様上、CALLBACK関数(ダイアログ、ウィンドウに限らず)をクラスに書くことはできない
 
 //ウィンドウプロシージャ（何かあった時によばれる関数）
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -193,12 +198,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 //ダイアログ用のプロシージャ（戻り値はbool）
+// こちらは本物。何もしない
 BOOL CALLBACK DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (msg)
-	{
-
-	}
-	return FALSE;
+	// Mainで使われているGameObject型がpRootJobなので使用。
+	// FindObjectはシーンの全てを探索するので、検索する側はどれでもいい
+	Stage* pStage = (Stage*)pRootJob->FindObject("Stage");
+	return pStage->DialogProc(hDlg, msg, wp, lp);
+	//		↓1行にまとめると…
+	//((Stage*)pRootJob->FindObject("Stage"))->DialogProc(hDlg, msg, wp, lp);
 }
-

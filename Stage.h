@@ -1,5 +1,7 @@
 #pragma once
 #include "Engine/GameObject.h"
+#include <Windows.h>    // プロシージャのために必要
+
 
 namespace {
     const int xSize = 15, zSize = 15;//フロアのx,z座標
@@ -11,6 +13,7 @@ namespace {
         WATER,
         BLOCK_MAX,
     };
+    const char* blockName[] = { "デフォルト","レンガ", "草", "砂", "水" };
 
 }
 
@@ -26,6 +29,9 @@ private:
         BLOCK_TYPE bt;
         int height;
     }table_[xSize * zSize];
+
+    int mode_;  // 0:上げる 1:下げる 2:種類を変える
+    int select_;    // 種類
 
 public:
     //コンストラクタ
@@ -46,10 +52,10 @@ public:
     //開放
     void Release() override;
 
-
-
     void SetBlock(int _x, int _z, BLOCK_TYPE _type);
 
     void SetStackBlock(int _x, int _z, int _height);
+
+    BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 };
 
