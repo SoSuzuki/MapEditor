@@ -46,5 +46,7 @@ namespace Direct3D
 	//extern	CPP側で定義忘れないこと！
 	extern ID3D11Device* pDevice_;
 	extern ID3D11DeviceContext* pContext_;	//デバイスコンテキスト
+	extern int scrWidth, scrHeight;
+
 
 };

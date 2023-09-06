@@ -17,6 +17,16 @@ using namespace Direct3D;
 
 class Texture;
 
+struct RayCastData
+{
+	XMFLOAT4 start;
+	XMFLOAT4 dir;
+	bool hit;
+	float dist;
+
+	//RayCastData() { dist = 99999.0f; }
+};
+
 class Fbx
 {
 private:
@@ -72,16 +82,6 @@ public:
 
 	Fbx();
 	~Fbx();
-
-	struct RayCastData
-	{
-		XMFLOAT4 start;
-		XMFLOAT4 dir;
-		bool hit;
-		float dist;
-
-		//RayCastData() { dist = 99999.0f; }
-	};
 
 	HRESULT Load(std::string fileName);
 	void Draw(Transform& transform);

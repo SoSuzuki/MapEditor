@@ -1,6 +1,7 @@
 #pragma once
-#include "Engine/GameObject.h"
 #include <Windows.h>    // プロシージャのために必要
+#include "Engine/GameObject.h"
+#include "Engine/Direct3D.h"
 
 
 namespace {

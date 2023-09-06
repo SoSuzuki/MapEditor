@@ -42,4 +42,6 @@ namespace Model
 	/// ‘S‚Ä‚Ìƒ‚ƒfƒ‹‚ð‰ð•ú
 	/// </summary>
 	//void AllRelease();
+
+	void RayCast(int _hModel, RayCastData& _rayData);
 };

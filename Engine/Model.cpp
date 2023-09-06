@@ -75,6 +75,11 @@ namespace Model
 		modelList.clear();	// メモリに入ってるアドレスを消す(メモリリークを防ぐ)
 	}
 
+	void RayCast(int _hModel, RayCastData& _rayData)
+	{	//指定したモデル番号のFBXにレイキャスト
+		modelList[_hModel]->pFbx->RayCast(_rayData);
+	}
+
 	//void AllRelease()
 	//{
 	//	for (int i = 0; i < modelList.size(); i++)

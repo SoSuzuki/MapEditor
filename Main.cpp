@@ -20,6 +20,10 @@ const char* WIN_CLASS_NAME = "SampleGame";  //ウィンドウクラス名
 const int WINDOW_WIDTH = 800;  //ウィンドウの幅
 const int WINDOW_HEIGHT = 600; //ウィンドウの高さ
 
+//RECT winRect = { 0,0,0,0 };
+//int winW = winRect.right - winRect.left;
+//int winH = winRect.top - winRect.bottom;
+
 RootJob* pRootJob = nullptr;
 
 //プロトタイプ宣言

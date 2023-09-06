@@ -1,6 +1,7 @@
 #include "Stage.h"
 #include <string>
 #include "Engine/Model.h"
+#include "Engine/Input.h"
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
@@ -40,6 +41,32 @@ void Stage::Initialize()
 
 void Stage::Update()
 {
+	float w = (float)(scrWidth / 2);
+	float h = (float)(scrHeight / 2);
+	//OfsetX,Y は 0
+	float minZ = 0.0f, maxZ = 1.0f;
+
+	XMMATRIX vp		
+	{	//参考資料：https://blog.natade.net/2017/06/09/directx-opengl-viewport/#toc5
+		w, 0,	0,	   0,
+		0,-h,	0,	   0,
+		0, 0,maxZ-minZ,0,
+		w, h,	minZ,  1
+	};
+	//ビューポート
+	XMMATRIX invVP = ;
+	//プロジェクション変換
+	XMMATRIX invProj = ;
+	//ビュー変換
+	XMMATRIX invView = ;
+	XMFLOAT3 mousePosFront;
+	XMStoreFloat3(&mousePosFront,Input::GetMousePosition());
+	mousePosFront.z = 0.0f;
+	XMFLOAT3 mousePosBack;
+	XMStoreFloat3(&mousePosBack, Input::GetMousePosition());
+	mousePosBack.z = 1.0f;
+
+
 }
 
 void Stage::Draw()
