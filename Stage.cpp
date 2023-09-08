@@ -95,8 +95,8 @@ void Stage::Update()
 
 				//⑥ レイが当たったらブレークポイントで止めて確認
 				if (data.hit) {
-					a_++;
 					data.hit = false;
+					break;
 				}
 			}
 		}

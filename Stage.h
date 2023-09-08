@@ -34,7 +34,6 @@ private:
 
     int mode_;  // 0:上げる 1:下げる 2:種類を変える
     int select_;    // 種類
-    int a_;     // ブレークポイント用の変数
 
 public:
     //コンストラクタ
