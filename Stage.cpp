@@ -5,7 +5,7 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-	:GameObject(parent, "Stage"), hModel_{-1},a_(0)
+	:GameObject(parent, "Stage"), hModel_{-1}
 {
 }
 
