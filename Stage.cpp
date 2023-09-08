@@ -53,18 +53,44 @@ void Stage::Update()
 		0, 0,maxZ-minZ,0,
 		w, h,	minZ,  1
 	};
-	//ビューポート
-	XMMATRIX invVP = ;
+	//ビューポート変換
+	XMMATRIX invVP = XMMatrixInverse(nullptr, vp);
 	//プロジェクション変換
-	XMMATRIX invProj = ;
+	XMMATRIX invProj = XMMatrixInverse(nullptr, Camera::GetProjectionMatrix());
 	//ビュー変換
-	XMMATRIX invView = ;
+	XMMATRIX invView = XMMatrixInverse(nullptr, Camera::GetViewMatrix());
 	XMFLOAT3 mousePosFront;
-	XMStoreFloat3(&mousePosFront,Input::GetMousePosition());
+	XMStoreFloat3(&mousePosFront, Input::GetMousePosition());
 	mousePosFront.z = 0.0f;
 	XMFLOAT3 mousePosBack;
 	XMStoreFloat3(&mousePosBack, Input::GetMousePosition());
 	mousePosBack.z = 1.0f;
+
+	//① mousePosFrontをベクトルに変換
+	XMVECTOR vMouseFront = XMLoadFloat3(&mousePosFront);
+	//② ①にinvVP,invProj,invViewをかける
+	vMouseFront = XMVector3TransformCoord(vMouseFront, (invVP * invProj * invView));
+	//③ mousePosBackをベクトルに変換
+	XMVECTOR vMouseBack = XMLoadFloat3(&mousePosBack);
+	//④ ③にinvVP,invProj,invViewをかける
+	vMouseBack = XMVector3TransformCoord(vMouseBack, (invVP * invProj * invView));
+	
+	//⑤ ②から④に向かってレイを打つ(とりあえずモデル番号はhModel_[0])
+	for (int x = 0; x < xSize; x++){
+		for (int z = 0; z < zSize; z++) {
+			for (int y = 0; y < table_[x * z].height + 1; y++) {
+				RayCastData data;
+				data.start = XMFLOAT4(0, 5, 0,0);
+				data.dir = XMFLOAT4(0, -1, 0, 0);
+				Model::RayCast(hModel_[0], data);
+				
+				//⑥ レイが当たったらブレークポイントで止めて確認
+				if (data.hit) {
+					break;
+				}
+			}
+		}
+	}
 
 
 }
