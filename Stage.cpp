@@ -80,8 +80,14 @@ void Stage::Update()
 		for (int z = 0; z < zSize; z++) {
 			for (int y = 0; y < table_[x * z].height + 1; y++) {
 				RayCastData data;
-				data.start = XMFLOAT4(0, 5, 0,0);
-				data.dir = XMFLOAT4(0, -1, 0, 0);
+				XMStoreFloat4(&data.start, vMouseFront);
+				XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
+				Transform trans;
+				trans.position_.x = x;
+				trans.position_.y = y;
+				trans.position_.z = z;
+				Model::SetTransform(hModel_[0], trans);
+
 				Model::RayCast(hModel_[0], data);
 				
 				//⑥ レイが当たったらブレークポイントで止めて確認
