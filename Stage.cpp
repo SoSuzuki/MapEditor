@@ -5,7 +5,7 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-	:GameObject(parent, "Stage"), hModel_{-1}
+	:GameObject(parent, "Stage"), hModel_{-1},a_(0)
 {
 }
 
@@ -35,22 +35,25 @@ void Stage::Initialize()
 	for (int x = 0; x < xSize; x++) {
 		for (int z = 0; z < zSize; z++) {
 			SetBlock(x, z, DEFAULT);
+			SetStackBlock(x, z, ySize);
 		}
 	}
 }
 
 void Stage::Update()
 {
+	if (!Input::IsMouseButtonDown(0)) {
+		return;
+	}
 	float w = (float)(scrWidth / 2);
 	float h = (float)(scrHeight / 2);
 	//OfsetX,Y は 0
 	float minZ = 0.0f, maxZ = 1.0f;
-
-	XMMATRIX vp		
+	XMMATRIX vp
 	{	//参考資料：https://blog.natade.net/2017/06/09/directx-opengl-viewport/#toc5
 		w, 0,	0,	   0,
 		0,-h,	0,	   0,
-		0, 0,maxZ-minZ,0,
+		0, 0,maxZ - minZ,0,
 		w, h,	minZ,  1
 	};
 	//ビューポート変換
@@ -65,7 +68,7 @@ void Stage::Update()
 	XMFLOAT3 mousePosBack;
 	XMStoreFloat3(&mousePosBack, Input::GetMousePosition());
 	mousePosBack.z = 1.0f;
-
+	
 	//① mousePosFrontをベクトルに変換
 	XMVECTOR vMouseFront = XMLoadFloat3(&mousePosFront);
 	//② ①にinvVP,invProj,invViewをかける
@@ -76,7 +79,7 @@ void Stage::Update()
 	vMouseBack = XMVector3TransformCoord(vMouseBack, (invVP * invProj * invView));
 	
 	//⑤ ②から④に向かってレイを打つ(とりあえずモデル番号はhModel_[0])
-	for (int x = 0; x < xSize; x++){
+	for (int x = 0; x < xSize; x++) {
 		for (int z = 0; z < zSize; z++) {
 			for (int y = 0; y < table_[x * z].height + 1; y++) {
 				RayCastData data;
@@ -89,15 +92,15 @@ void Stage::Update()
 				Model::SetTransform(hModel_[0], trans);
 
 				Model::RayCast(hModel_[0], data);
-				
+
 				//⑥ レイが当たったらブレークポイントで止めて確認
 				if (data.hit) {
-					break;
+					a_++;
+					data.hit = false;
 				}
 			}
 		}
 	}
-
 
 }
 
@@ -110,7 +113,6 @@ void Stage::Draw()
 			transform_.position_.x = x;
 			transform_.position_.z = z;
 			
-			SetStackBlock(x, z, 3);
 
 			Model::SetTransform(hModel_[(x + z) % 5], transform_);
 			Model::Draw(hModel_[(x + z) % 5]);

@@ -6,6 +6,7 @@
 
 namespace {
     const int xSize = 15, zSize = 15;//フロアのx,z座標
+    const int ySize = 1;
     enum BLOCK_TYPE {
         DEFAULT = 0,
         BRICK,
@@ -33,6 +34,7 @@ private:
 
     int mode_;  // 0:上げる 1:下げる 2:種類を変える
     int select_;    // 種類
+    int a_;     // ブレークポイント用の変数
 
 public:
     //コンストラクタ
