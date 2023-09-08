@@ -89,6 +89,7 @@ namespace Model
 		//‡BrayData.start‚ğƒ‚ƒfƒ‹‹óŠÔ‚É•ÏŠ·(‡@‚ğ‚©‚¯‚é)
 		XMVECTOR vStart = XMLoadFloat4(&_rayData.start);
 		vStart = XMVector3TransformCoord(vStart, wInv);
+		XMStoreFloat4(&_rayData.start, vStart);
 		//‡C(‹“_‚©‚ç•ûŒüƒxƒNƒgƒ‹‚ğ‚¿‚å‚¢L‚Î‚µ‚½æ)’Ê‰ß“_(‡A)‚É‡@‚ğ‚©‚¯‚é
 		vPass = XMVector3TransformCoord(vPass, wInv);
 		//‡DrayData.dir‚ğ‡B‚©‚ç‡C‚ÉŒü‚©‚¤ƒxƒNƒgƒ‹‚É‚·‚é(ˆø‚«Z)
