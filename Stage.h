@@ -26,12 +26,19 @@ private:
     int hModel_[BLOCK_MAX];     //モデル番号
   //int table_[xSize * zSize];  //フロアの座標
     
+#if 0
     struct Stack
     {
         BLOCK_TYPE bt;
         int height;
     }table_[xSize * zSize];
-
+#else
+    struct BrockType
+    {
+        BLOCK_TYPE bt;
+        int height;
+    }table_[xSize][zSize];
+#endif
     int mode_;  // 0:上げる 1:下げる 2:種類を変える
     int select_;    // 種類
 
