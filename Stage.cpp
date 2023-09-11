@@ -240,6 +240,12 @@ void Stage::Update()
 
 					//6 レイが当たったらブレークポイント
                     if (data.hit) {
+						for (int i=0;i<1;i++) 
+						{	// data.distを比較して１番短い奴だけ上げ下げできるようにする
+
+						}
+
+
                         table_[x][z].height++;
                         data.hit = false;
                         return;
