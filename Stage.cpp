@@ -144,14 +144,10 @@ void Stage::SetStackBlock(int _x, int _z, int _height)
 {
 	table_[_z * xSize + _x].height = _height;
 }
-#else
-//“ñŸŒ³”z—ñVersion
-
+#else // “ñŸŒ³”z—ñVersion
 //‰Šú‰»
 void Stage::Initialize()
 {
-
-    srand(time(NULL));
 
 	std::string modelName[] = {
 		"BoxDefault.fbx",
@@ -171,7 +167,7 @@ void Stage::Initialize()
 
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
-            table_[x][z].bt = WATER;
+            table_[x][z].bt = DEFAULT;
             table_[x][z].height = 0;
 
         }
@@ -260,17 +256,15 @@ void Stage::Draw()
 
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
+			transform_.position_.x = x;
+			transform_.position_.z = z;
             for (int y = 0; y < table_[x][z].height + 1; y++) {
                 int type = table_[x][z].bt;
-                Transform blockTrans;
-                blockTrans.position_.z = z;
-                blockTrans.position_.x = x;
-                blockTrans.position_.y = y;
-                Model::SetTransform(hModel_[type], blockTrans);
-                Model::Draw(hModel_[type]);
+                transform_.position_.y = y;
+                Model::SetTransform(hModel_[(x + z) % 5], transform_);
+                Model::Draw(hModel_[(x + z) % 5]);
 
             }
-
         }
     }
 
