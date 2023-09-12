@@ -180,7 +180,6 @@ void Stage::Initialize()
 //更新
 void Stage::Update()
 {
-
     if (Input::IsMouseButtonDown(0)) {
 
         float w = (float)(Direct3D::scrWidth / 2.0f);
@@ -245,8 +244,20 @@ void Stage::Update()
 
 						}
 
+						switch (mode_)
+						{
+						case 0:
+							table_[x][z].height++;
+							break;
+						case 1:
+							if (table_[x][z].height > 0)
+								table_[x][z].height--;
+							break;
+						case 2:
+							break;
+						}
 
-                        table_[x][z].height++;
+                        
                         data.hit = false;
                         return;
                     }
@@ -316,6 +327,16 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 	case WM_COMMAND:
 		// ラジオボタンの切り替え
 		SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), CB_GETCURSEL, 0, 0);
+		
+		if (IsDlgButtonChecked(hDlg, IDC_RADIO_UP))
+			mode_ = 0;
+
+		if (IsDlgButtonChecked(hDlg, IDC_RADIO_DOWN))
+			mode_ = 1;
+
+		if (IsDlgButtonChecked(hDlg, IDC_RADIO_CHANGE))
+			mode_ = 2;
+
 		return TRUE;
 	}
 	return FALSE;
