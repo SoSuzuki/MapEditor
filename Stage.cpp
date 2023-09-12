@@ -13,138 +13,6 @@ Stage::~Stage()
 {
 }
 
-#if 0
-// 1次元配列Version
-
-void Stage::Initialize()
-{
-	std::string modelName[] = {
-		"BoxDefault.fbx",
-		"BoxBrick.fbx",
-		"BoxGrass.fbx",
-		"BoxSand.fbx",
-		"BoxWater.fbx"
-	};
-	std::string fname_base = "Assets/";
-
-	//モデルデータのロード
-	//hModel_[0] = Model::Load("Assets/BoxDefault.fbx");
-
-	for (int i = 0; i < BLOCK_MAX; i++) {
-		hModel_[i] = Model::Load(fname_base + modelName[i]);
-		assert(hModel_[i] >= 0);
-	}
-	// tableにブロックのタイプをセット
-	for (int x = 0; x < xSize; x++) {
-		for (int z = 0; z < zSize; z++) {
-			SetBlock(x, z, DEFAULT);
-			SetStackBlock(x, z, ySize);
-		}
-	}
-}
-
-void Stage::Update()
-{
-	if (!Input::IsMouseButtonDown(0)) {
-		return;
-	}
-	float w = (float)(scrWidth / 2);
-	float h = (float)(scrHeight / 2);
-	//OfsetX,Y は 0
-	float minZ = 0.0f, maxZ = 1.0f;
-	XMMATRIX vp
-	{	//参考資料：https://blog.natade.net/2017/06/09/directx-opengl-viewport/#toc5
-		w, 0,	0,	   0,
-		0,-h,	0,	   0,
-		0, 0,maxZ - minZ,0,
-		w, h,	minZ,  1
-	};
-	//ビューポート変換
-	XMMATRIX invVP = XMMatrixInverse(nullptr, vp);
-	//プロジェクション変換
-	XMMATRIX invProj = XMMatrixInverse(nullptr, Camera::GetProjectionMatrix());
-	//ビュー変換
-	XMMATRIX invView = XMMatrixInverse(nullptr, Camera::GetViewMatrix());
-	XMFLOAT3 mousePosFront;
-	XMStoreFloat3(&mousePosFront, Input::GetMousePosition());
-	mousePosFront.z = 0.0f;
-	XMFLOAT3 mousePosBack;
-	XMStoreFloat3(&mousePosBack, Input::GetMousePosition());
-	mousePosBack.z = 1.0f;
-	
-	//① mousePosFrontをベクトルに変換
-	XMVECTOR vMouseFront = XMLoadFloat3(&mousePosFront);
-	//② ①にinvVP,invProj,invViewをかける
-	vMouseFront = XMVector3TransformCoord(vMouseFront, (invVP * invProj * invView));
-	//③ mousePosBackをベクトルに変換
-	XMVECTOR vMouseBack = XMLoadFloat3(&mousePosBack);
-	//④ ③にinvVP,invProj,invViewをかける
-	vMouseBack = XMVector3TransformCoord(vMouseBack, (invVP * invProj * invView));
-	
-	//⑤ ②から④に向かってレイを打つ(とりあえずモデル番号はhModel_[0])
-	for (int x = 0; x < xSize; x++) {
-		for (int z = 0; z < zSize; z++) {
-			for (int y = 0; y < table_[x * z].height + 1; y++) {
-				RayCastData data;
-				XMStoreFloat4(&data.start, vMouseFront);
-				XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
-				Transform trans;
-				trans.position_.x = x;
-				trans.position_.y = y;
-				trans.position_.z = z;
-				Model::SetTransform(hModel_[0], trans);
-
-				Model::RayCast(hModel_[0], data);
-
-				//⑥ レイが当たったらブレークポイントで止めて確認
-				if (data.hit) {
-					table_[x * z].height++;
-					data.hit = false;
-					break;
-				}
-			}
-		}
-	}
-
-}
-
-void Stage::Draw()
-{
-	for (int x = 0; x < xSize; x++)
-	{
-		for (int z = 0; z < zSize; z++)
-		{
-			transform_.position_.x = x;
-			transform_.position_.z = z;
-			
-
-			Model::SetTransform(hModel_[(x + z) % 5], transform_);
-			Model::Draw(hModel_[(x + z) % 5]);
-
-			for (int y = 0; y < table_[z * xSize + x].height; y++) {
-				transform_.position_.y = y;
-				Model::SetTransform(hModel_[(x + z) % 5], transform_);
-				Model::Draw(hModel_[(x + z) % 5]);
-			}
-		
-		}
-	}
-}
-
-void Stage::Release()
-{
-}
-
-void Stage::SetBlock(int _x, int _z, BLOCK_TYPE _type)
-{
-	table_[_z * xSize + _x].bt = _type;
-}
-
-void Stage::SetStackBlock(int _x, int _z, int _height)
-{
-	table_[_z * xSize + _x].height = _height;
-}
-#else // 二次元配列Version
 //初期化
 void Stage::Initialize()
 {
@@ -165,6 +33,7 @@ void Stage::Initialize()
         assert(hModel_[i] >= 0);
     }
 
+    // tableにブロックのタイプをセット
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
             table_[x][z].bt = DEFAULT;
@@ -173,94 +42,89 @@ void Stage::Initialize()
         }
     }
 
-    SetStackBlock(5, 5, 3);
+    // SetStackBlock(5, 5, 3); //お試し的に伸ばした
 
 }
 
 //更新
 void Stage::Update()
 {
-    if (Input::IsMouseButtonDown(0)) {
+    if (!Input::IsMouseButtonDown(0)) {
+        return;
+    }
+    float w = (float)(Direct3D::scrWidth / 2);
+    float h = (float)(Direct3D::scrHeight / 2);
+    float offsetX = 0;
+    float offsetY = 0;
+    float minZ = 0.0f, maxZ = 1.0f;
+ 
+    //ビューポート作成
+    XMMATRIX vp =
+    {   //参考資料：https://blog.natade.net/2017/06/09/directx-opengl-viewport/#toc5
+        w                ,0                ,0           ,0,
+        0                ,-h               ,0           ,0,
+        0                ,0                ,maxZ - minZ ,0,
+        offsetX + w      ,offsetY + h      ,minZ        ,1
+    };
 
-        float w = (float)(Direct3D::scrWidth / 2.0f);
-        float h = (float)(Direct3D::scrHeight / 2.0f);
-        float offsetX = 0;
-        float offsetY = 0;
-        float minZ = 0;
-        float maxZ = 1;
+    //ビューポート変換
+    XMMATRIX invVP = XMMatrixInverse(nullptr, vp);
+    //プロジェクション変換
+    XMMATRIX invProj = XMMatrixInverse(nullptr, Camera::GetProjectionMatrix());
+    //ビュー変換
+    XMMATRIX invView = XMMatrixInverse(nullptr, Camera::GetViewMatrix());
+    XMFLOAT3 mousePosFront;
+    XMStoreFloat3(&mousePosFront, Input::GetMousePosition());
+    mousePosFront.z = 0.0f;
+    XMFLOAT3 mousePosBack;
+    XMStoreFloat3(&mousePosBack, Input::GetMousePosition());
+    mousePosBack.z = 1.0f;
 
-        //ビューポート作成
-        XMMATRIX vp =
-        {
-            w                ,0                ,0           ,0,
-            0                ,-h               ,0           ,0,
-            0                ,0                ,maxZ - minZ ,0,
-            offsetX + w      ,offsetY + h      ,minZ        ,1
-        };
+    //① mousePosFrontをベクトルに変換
+    XMVECTOR vMouseFront = XMLoadFloat3(&mousePosFront);
+    //② ①にinvVP,invProj,invViewをかける
+    vMouseFront = XMVector3TransformCoord(vMouseFront, (invVP * invProj * invView));
+    //③ mousePosBackをベクトルに変換
+    XMVECTOR vMouseBack = XMLoadFloat3(&mousePosBack);
+    //④ ③にinvVP,invProj,invViewをかける
+    vMouseBack = XMVector3TransformCoord(vMouseBack, (invVP * invProj * invView));
+    //⑤ ②から④に向かってレイを打つ(とりあえずモデル番号はhModel_[0])
+    for (int x = 0; x < xSize; x++) {
+        for (int z = 0; z < zSize; z++) {
+            Transform trans;
+            trans.position_.x = x;
+            trans.position_.z = z;
+            for (int y = 0; y < table_[x][z].height + 1; y++) {
 
-        //ビューポートを逆行列に
-        XMMATRIX invVP = XMMatrixInverse(nullptr, vp);
-        //プロジェクション変換
-        XMMATRIX invProj = XMMatrixInverse(nullptr, Camera::GetProjectionMatrix());
-        //びゅー変換
-        XMMATRIX invView = XMMatrixInverse(nullptr, Camera::GetViewMatrix());
-        XMVECTOR mousePosVec = Input::GetMousePosition();
-        XMFLOAT3 mousePosFront;
-        XMStoreFloat3(&mousePosFront, mousePosVec);
-        mousePosFront.z = 0.0;
-        XMVECTOR mouseVec = Input::GetMousePosition();
-        XMFLOAT3 mousePosBack;
-        XMStoreFloat3(&mousePosBack, mouseVec);
-        mousePosBack.z = 1.0f;
+                RayCastData data;
+                XMStoreFloat4(&data.start, vMouseFront);
+                XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
+                
+                trans.position_.y = y;
+                
+                Model::SetTransform(hModel_[0], trans);
 
-        //1,mousePosFrontをベクトルに変換
-        XMVECTOR vMouseFront = XMLoadFloat3(&mousePosFront);
-        //2. 1にinvVP,invPrj,invViewをかける
-        vMouseFront = XMVector3TransformCoord(vMouseFront, invVP * invProj * invView);
-        //3,mousePosBackをベクトルに変換
-        XMVECTOR vMouseBack = XMLoadFloat3(&mousePosBack);
-        //4,3にinvVP,invPrj,invVeewをかける
-        vMouseBack = XMVector3TransformCoord(vMouseBack, invVP * invProj * invView);
-        //5,2から4に向かってレイを打つ（とりあえず）
-        for (int x = 0; x < 15; x++) {
-            for (int z = 0; z < 15; z++) {
-                for (int y = 0; y < table_[x][z].height + 1; y++) {
+                Model::RayCast(hModel_[0], data);
 
-                    RayCastData data;
-                    XMStoreFloat4(&data.start, vMouseFront);
-                    XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
-                    Transform trans;
-                    trans.position_.x = x;
-                    trans.position_.y = y;
-                    trans.position_.z = z;
-                    Model::SetTransform(hModel_[0], trans);
-
-                    Model::RayCast(hModel_[0], data);
-
-					//6 レイが当たったらブレークポイント
-                    if (data.hit) {
-						for (int i=0;i<1;i++) 
-						{	// data.distを比較して１番短い奴だけ上げ下げできるようにする
-
-						}
-
-						switch (mode_)
-						{
-						case 0:
-							table_[x][z].height++;
-							break;
-						case 1:
-							if (table_[x][z].height > 0)
-								table_[x][z].height--;
-							break;
-						case 2:
-							break;
-						}
-
-                        
-                        data.hit = false;
-                        return;
-                    }
+                //⑥ レイが当たったらブレークポイントで止めて確認
+                if (data.hit) {
+					switch (mode_)
+					{
+					case 0:
+						table_[x][z].height++;
+						break;
+					case 1:
+						if (table_[x][z].height > 0)
+							table_[x][z].height--;
+						break;
+					case 2:
+						table_[x][z].bt = (BLOCK_TYPE)hModel_[select_];
+						break;
+                    default:
+                        break;
+					}      
+                    data.hit = false;
+                    return;
                 }
             }
         }
@@ -273,13 +137,14 @@ void Stage::Draw()
 
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
-			transform_.position_.x = x;
-			transform_.position_.z = z;
             for (int y = 0; y < table_[x][z].height + 1; y++) {
                 int type = table_[x][z].bt;
-                transform_.position_.y = y;
-                Model::SetTransform(hModel_[(x + z) % 5], transform_);
-                Model::Draw(hModel_[(x + z) % 5]);
+                Transform bTrans;
+                bTrans.position_.x = x;
+                bTrans.position_.y = y;
+                bTrans.position_.z = z;
+                Model::SetTransform(hModel_[type], bTrans);
+                Model::Draw(hModel_[type]);
 
             }
         }
@@ -294,9 +159,6 @@ void Stage::Release()
 void Stage::SetBlock(int _x, int _z, BLOCK_TYPE _type)
 {
     table_[_x][_z].bt = _type;
-    //一次元配列で二次元配列を表現するなら
-    //table_[_x * XSIZE +_z] = _type;
-    //掛け算から先にするから、x座標が０の時はXSIZEも０になりz座標だけが適用される。xが2とかなら30からとなり3行目ぐらいに入る
 }
 
 void Stage::SetStackBlock(int _x, int _z, int _height)
@@ -304,11 +166,9 @@ void Stage::SetStackBlock(int _x, int _z, int _height)
     table_[_x][_z].height = _height;
 }
 
-#endif
-
 //ダイアログ用のプロシージャ（戻り値はbool）
 // クラスでプロシージャが使えないので、偽物としてついでに呼ばれるようにすれば
-// 実質クラスで使用していることになるよね
+// 実質クラスで使用していることになる
 BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg)
@@ -322,11 +182,11 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		for (int i = 0; i < BLOCK_TYPE::BLOCK_MAX; i++) {
 			SendMessage(GetDlgItem(hDlg, IDC_COMBO_GROUND), CB_ADDSTRING, 0, (LPARAM)blockName[i]);
 		}
+        SendMessage(GetDlgItem(hDlg, IDC_COMBO_GROUND), CB_SETCURSEL, 0, 0);
 		return TRUE;
 
 	case WM_COMMAND:
 		// ラジオボタンの切り替え
-		SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), CB_GETCURSEL, 0, 0);
 		
 		if (IsDlgButtonChecked(hDlg, IDC_RADIO_UP))
 			mode_ = 0;
@@ -334,8 +194,10 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		if (IsDlgButtonChecked(hDlg, IDC_RADIO_DOWN))
 			mode_ = 1;
 
-		if (IsDlgButtonChecked(hDlg, IDC_RADIO_CHANGE))
+		if (IsDlgButtonChecked(hDlg, IDC_RADIO_CHANGE)) {
+			select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO_GROUND), CB_GETCURSEL, 0, 0);
 			mode_ = 2;
+		}
 
 		return TRUE;
 	}

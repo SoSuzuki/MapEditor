@@ -42,7 +42,7 @@ namespace Model
 		modelList.push_back(pData);
 
 		// 番号（配列の要素数-1）を返す
-		return (int)modelList.size() - 1;
+		return (modelList.size() - 1);
 	}
 
 	void Model::SetTransform(int _hModel, Transform _t)

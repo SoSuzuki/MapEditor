@@ -46,6 +46,9 @@ void Controller::Update()
 	//transform_.rotate_.y度回転させる行列を作成
 	XMMATRIX mRotY = XMMatrixRotationY(XMConvertToRadians(transform_.rotate_.y));
 
+	//transform_.rotate_.z度回転させる行列を作成
+	XMMATRIX mRotZ = XMMatrixRotationZ(XMConvertToRadians(transform_.rotate_.z));
+
 	//現在位置をベクトル型に変換
 	XMVECTOR vPos = XMLoadFloat3(&transform_.position_);
 
@@ -75,11 +78,15 @@ void Controller::Update()
 	//カメラをControllerの角度と同期させる
 	//vCam -> カメラのベクトル
 	XMVECTOR vCam = { 0, 0, -10, 0 };	// yは0にしておかないと、rotateの計算がおかしくなる
-	vCam = XMVector3TransformCoord(vCam, mRotX * mRotY);
-	XMFLOAT3 camPos;
-	XMStoreFloat3(&camPos, vPos + vCam);
-	Camera::SetPosition(camPos);
-	Camera::SetTarget(XMLoadFloat3(&transform_.position_));	// カメラの焦点はプレイヤーの位置
+	vCam = XMVector3TransformCoord(vCam, mRotX * mRotY * mRotZ);
+	
+	//XMFLOAT3 camPos;
+	//XMStoreFloat3(&camPos, vPos + vCam);
+	//Camera::SetPosition(camPos);
+	//Camera::SetTarget(XMLoadFloat3(&transform_.position_));	// カメラの焦点はプレイヤーの位置
+
+	Camera::SetPosition(vPos + vCam);           //カメラの位置は自撮り棒の先端（現在地+自撮り棒）
+	Camera::SetTarget(transform_.position_);    //カメラの見る位置はこのオブジェクトの位置
 }
 
 void Controller::Draw()
