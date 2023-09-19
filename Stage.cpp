@@ -95,16 +95,16 @@ void Stage::Update()
 
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
-            Transform trans;
-            trans.position_.x = x;
-            trans.position_.z = z;
+            
             for (int y = 0; y < table_[x][z].height + 1; y++) {
 
-
                 RayCastData data;
+                data.hit = false;
                 XMStoreFloat4(&data.start, vMouseFront);
                 XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
-                
+                Transform trans;
+                trans.position_.x = x;
+                trans.position_.z = z;
                 trans.position_.y = y;
                 
                 Model::SetTransform(hModel_[0], trans);
@@ -118,27 +118,28 @@ void Stage::Update()
                         updateX = x;
                         updateZ = z;
 
-                        switch (mode_)
-                        {
-                        case 0:
-                            table_[x][z].height++;
-                            break;
-                        case 1:
-                            if (table_[x][z].height > 0)
-                                table_[x][z].height--;
-                            break;
-                        case 2:
-                            table_[x][z].bt = (BLOCK_TYPE)hModel_[select_];
-                            break;
-                        default:
-                            break;
-                        }
                     }
                     data.hit = false;
-                    
                 }
             }
         }
+    }
+
+    switch (mode_)
+    {
+    case 0:
+            table_[updateX][updateZ].height++;
+            break;
+        break;
+    case 1:
+        if (table_[updateX][updateZ].height > 0)
+            table_[updateX][updateZ].height--;
+        break;
+    case 2:
+        table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
+        break;
+    default:
+        break;
     }
 }
 

@@ -11,7 +11,7 @@ namespace Model
 		ModelData* pData = new ModelData;
 
 		// そのメンバのファイル名に引数を代入
-		pData->fileName = _fileName;
+		pData->fileName_ = _fileName;
 
 		// Fbxオブジェクトを作成し、ロード
 		bool isUsed = false;	//使ったことのあるモデルか
@@ -19,8 +19,8 @@ namespace Model
 		for (auto& e : modelList)
 		{
 
-			if (e != nullptr && e->fileName == _fileName) {
-				pData->pFbx = e->pFbx;
+			if (e != nullptr && e->fileName_ == _fileName) {
+				pData->pFbx_ = e->pFbx_;
 				isUsed = true;
 				break;
 			}
@@ -28,14 +28,14 @@ namespace Model
 
 		//使ったことのないファイルを開く
 		if (isUsed == false) {
-			pData->pFbx = new Fbx;
-			if (FAILED(pData->pFbx->Load(_fileName))) {
+			pData->pFbx_ = new Fbx;
+			if (FAILED(pData->pFbx_->Load(_fileName))) {
 				//開けなかった
-				SAFE_DELETE(pData->pFbx);
+				SAFE_DELETE(pData->pFbx_);
 				SAFE_DELETE(pData);
 				return -1;
 			}
-			pData->fileName = _fileName;	//開けた
+			pData->fileName_ = _fileName;	//開けた
 		}
 
 		// 構造体の中身が埋まったので、動的配列に突っ込む
@@ -47,12 +47,12 @@ namespace Model
 
 	void Model::SetTransform(int _hModel, Transform _t)
 	{	//モデル番号は、modelListのインデックス
-		modelList[_hModel]->transform = _t;
+		modelList[_hModel]->transform_ = _t;
 	}
 
 	void Model::Draw(int _hModel)
 	{	//モデル番号は、modelListのインデックス
-		modelList[_hModel]->pFbx->Draw(modelList[_hModel]->transform);
+		modelList[_hModel]->pFbx_->Draw(modelList[_hModel]->transform_);
 	}
 
 	void Release()
@@ -62,13 +62,13 @@ namespace Model
 		{
 			for (int j = i + 1; j < modelList.size(); j++)
 			{
-				if (modelList[i]->pFbx == modelList[j]->pFbx) {	// どっちかが片方を参照してる
+				if (modelList[i]->pFbx_ == modelList[j]->pFbx_) {	// どっちかが片方を参照してる
 					isReffed = true;
 					break;
 				}
 			}
 			if (isReffed == false) {	// 参照してないならdelete
-				SAFE_DELETE(modelList[i]->pFbx);
+				SAFE_DELETE(modelList[i]->pFbx_);
 			}
 			SAFE_DELETE(modelList[i]);
 		}
@@ -78,9 +78,9 @@ namespace Model
 	void RayCast(int _hModel, RayCastData& _rayData)
 	{	
 		//0 モデルのトランスフォームをカルキュレーション
-		modelList[_hModel]->transform.Calclation();
+		modelList[_hModel]->transform_.Calclation();
 		//①ワールド行列の逆行列
-		XMMATRIX wInv = XMMatrixInverse(nullptr, modelList[_hModel]->transform.GetWorldMatrix());
+		XMMATRIX wInv = XMMatrixInverse(nullptr, modelList[_hModel]->transform_.GetWorldMatrix());
 		//②レイの通過点を求める(モデル空間での例の方向ベクトルを求める)
 		XMVECTOR vPass{ _rayData.start.x + _rayData.dir.x,
 						_rayData.start.y + _rayData.dir.y,
@@ -93,10 +93,10 @@ namespace Model
 		//④(視点から方向ベクトルをちょい伸ばした先)通過点(②)に①をかける
 		vPass = XMVector3TransformCoord(vPass, wInv);
 		//⑤rayData.dirを③から④に向かうベクトルにする(引き算)
-		vPass -= vStart;
+		vPass = vPass - vStart;
 		XMStoreFloat4(&_rayData.dir, vPass);
 		//指定したモデル番号のFBXにレイキャスト
-		modelList[_hModel]->pFbx->RayCast(_rayData);
+		modelList[_hModel]->pFbx_->RayCast(_rayData);
 	}
 
 	//void AllRelease()

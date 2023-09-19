@@ -1,8 +1,14 @@
 #include "Transform.h"
 
-Transform::Transform() :matTranslate_(XMMatrixIdentity()), matRotate_(XMMatrixIdentity()), matScale_(XMMatrixIdentity()),
-	position_(XMFLOAT3(0, 0, 0)), rotate_(XMFLOAT3(0, 0, 0)), scale_(XMFLOAT3(1, 1, 1))
+Transform::Transform()
 {
+	matTranslate_ = XMMatrixIdentity();
+	matRotate_ = XMMatrixIdentity();
+	matScale_ = XMMatrixIdentity();
+	position_ = XMFLOAT3(0, 0, 0);
+	rotate_ = XMFLOAT3(0, 0, 0);
+	scale_ = XMFLOAT3(1, 1, 1);
+
 }
 
 Transform::~Transform()
@@ -28,7 +34,7 @@ void Transform::Calclation()
 
 XMMATRIX Transform::GetWorldMatrix()
 {
-	if (pParent_/* != nullptr*/) {	//親があったら
+	if (pParent_ != nullptr) {	//親があったら
 		//親のワールド座標を基準に
 		return matScale_ * matRotate_ * matTranslate_ * pParent_->GetWorldMatrix();
 	}else

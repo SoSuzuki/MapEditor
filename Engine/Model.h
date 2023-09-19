@@ -7,9 +7,9 @@ namespace Model
 {
 	struct ModelData
 	{
-		Fbx* pFbx = nullptr;
-		Transform transform;
-		std::string fileName;
+		Fbx* pFbx_ = nullptr;
+		Transform transform_;
+		std::string fileName_;
 	};
 
 	/// <summary>
