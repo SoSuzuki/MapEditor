@@ -5,7 +5,7 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-	:GameObject(parent, "Stage"), hModel_{ -1 }
+    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 }
 {
 }
 
@@ -83,7 +83,7 @@ void Stage::Update()
     //‡@ mousePosFront‚ðƒxƒNƒgƒ‹‚É•ÏŠ·
     XMVECTOR vMouseFront = XMLoadFloat3(&mousePosFront);
     //‡A ‡@‚ÉinvVP,invProj,invView‚ð‚©‚¯‚é
-    vMouseFront = XMVector3TransformCoord(vMouseFront, (invVP * invProj * invView));
+    vMouseFront = XMVector3TransformCoord(vMouseFront, invVP * invProj * invView);
     //‡B mousePosBack‚ðƒxƒNƒgƒ‹‚É•ÏŠ·
     XMVECTOR vMouseBack = XMLoadFloat3(&mousePosBack);
     //‡C ‡B‚ÉinvVP,invProj,invView‚ð‚©‚¯‚é
