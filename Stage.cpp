@@ -1,6 +1,5 @@
 #include "Stage.h"
 #include <string>
-#include <list>
 #include "Engine/Model.h"
 #include "Engine/Input.h"
 #include "resource.h"
@@ -90,10 +89,10 @@ void Stage::Update()
     //④ ③にinvVP,invProj,invViewをかける
     vMouseBack = XMVector3TransformCoord(vMouseBack, (invVP * invProj * invView));
     //⑤ ②から④に向かってレイを打つ(とりあえずモデル番号はhModel_[0])
-   
     
-    std::list<DistList>*distList;
-    
+    float minDist = 9999.9f;
+    int updateX = 0, updateZ = 0;
+
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
             Transform trans;
@@ -114,41 +113,32 @@ void Stage::Update()
 
                 //⑥ レイが当たったらブレークポイントで止めて確認
                 if (data.hit) {
-                    distlist_.hitDist = data.dist;
-                    distlist_.hitX = x;
-                    distlist_.hitZ = z;
-                    distList->push_back(distlist_);
+                    if (minDist > data.dist) {
+                        minDist = data.dist;
+                        updateX = x;
+                        updateZ = z;
 
+                        switch (mode_)
+                        {
+                        case 0:
+                            table_[x][z].height++;
+                            break;
+                        case 1:
+                            if (table_[x][z].height > 0)
+                                table_[x][z].height--;
+                            break;
+                        case 2:
+                            table_[x][z].bt = (BLOCK_TYPE)hModel_[select_];
+                            break;
+                        default:
+                            break;
+                        }
+                    }
                     data.hit = false;
                     
                 }
             }
         }
-    }
-    auto it = distList->begin();
-    for (it; it != distList->end(); ++it) {
-        if (it != distList->end()) {
-            if (it->hitDist </*次のイテレータのhitDist*/it->hitDist) {
-                // １番小さいhitDistを求める
-            }
-        }
-    }
-
-
-    switch (mode_)
-    {
-    case 0:
-        table_[x][z].height++;
-        break;
-    case 1:
-        if (table_[x][z].height > 0)
-            table_[x][z].height--;
-        break;
-    case 2:
-        table_[x][z].bt = (BLOCK_TYPE)hModel_[select_];
-        break;
-    default:
-        break;
     }
 }
 
