@@ -52,8 +52,8 @@ void Stage::Update()
     if (!Input::IsMouseButtonDown(0)) {
         return;
     }
-    float w = (float)(Direct3D::scrWidth / 2);
-    float h = (float)(Direct3D::scrHeight / 2);
+    float w = (float)(Direct3D::scrWidth / 2.0f);
+    float h = (float)(Direct3D::scrHeight / 2.0f);
     float offsetX = 0;
     float offsetY = 0;
     float minZ = 0.0f, maxZ = 1.0f;
@@ -92,6 +92,7 @@ void Stage::Update()
     
     float minDist = 9999.9f;
     int updateX = 0, updateZ = 0;
+    bool isHit = false;
 
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
@@ -99,7 +100,7 @@ void Stage::Update()
             for (int y = 0; y < table_[x][z].height + 1; y++) {
 
                 RayCastData data;
-                data.hit = false;
+                //data.hit = false;
                 XMStoreFloat4(&data.start, vMouseFront);
                 XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
                 Transform trans;
@@ -120,6 +121,7 @@ void Stage::Update()
 
                     }
                     data.hit = false;
+                    isHit = true;
                 }
             }
         }
@@ -127,16 +129,19 @@ void Stage::Update()
 
     switch (mode_)
     {
-    case 0:
+    case BLOCK_UP:
+        if(isHit)
             table_[updateX][updateZ].height++;
             break;
         break;
-    case 1:
-        if (table_[updateX][updateZ].height > 0)
-            table_[updateX][updateZ].height--;
+    case BLOCK_DOWN:
+        if(isHit)
+            if (table_[updateX][updateZ].height > 0)
+                table_[updateX][updateZ].height--;
         break;
-    case 2:
-        table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
+    case BLOCK_CHANGE:
+        if(isHit)
+            table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
         break;
     default:
         break;
@@ -200,15 +205,18 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 	case WM_COMMAND:
 		// ラジオボタンの切り替え
 		
-		if (IsDlgButtonChecked(hDlg, IDC_RADIO_UP))
-			mode_ = 0;
-
-		if (IsDlgButtonChecked(hDlg, IDC_RADIO_DOWN))
-			mode_ = 1;
-
+        if (IsDlgButtonChecked(hDlg, IDC_RADIO_UP)) {
+            mode_ = BLOCK_UP;
+            return TRUE;
+        }
+        if (IsDlgButtonChecked(hDlg, IDC_RADIO_DOWN)) {
+            mode_ = BLOCK_DOWN;
+            return TRUE;
+        }
 		if (IsDlgButtonChecked(hDlg, IDC_RADIO_CHANGE)) {
 			select_ = SendMessage(GetDlgItem(hDlg, IDC_COMBO_GROUND), CB_GETCURSEL, 0, 0);
-			mode_ = 2;
+			mode_ = BLOCK_CHANGE;
+            return TRUE;
 		}
 
 		return TRUE;

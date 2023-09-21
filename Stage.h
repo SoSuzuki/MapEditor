@@ -38,6 +38,12 @@ private:
         BLOCK_TYPE bt;
         int height;
     }table_[xSize][zSize];
+
+    enum {
+        BLOCK_UP = 0,
+        BLOCK_DOWN,
+        BLOCK_CHANGE,
+    };
 #endif
     int mode_;  // 0:ã‚°‚é 1:‰º‚°‚é 2:í—Ş‚ğ•Ï‚¦‚é
     int select_;    // í—Ş

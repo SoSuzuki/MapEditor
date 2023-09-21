@@ -37,7 +37,8 @@ XMMATRIX Transform::GetWorldMatrix()
 	if (pParent_ != nullptr) {	//親があったら
 		//親のワールド座標を基準に
 		return matScale_ * matRotate_ * matTranslate_ * pParent_->GetWorldMatrix();
-	}else
+	}
+	else
 		return matScale_ * matRotate_ * matTranslate_;
 }
 	

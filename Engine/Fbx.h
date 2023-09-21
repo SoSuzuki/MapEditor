@@ -24,7 +24,7 @@ struct RayCastData
 	bool hit;
 	float dist;
 
-	//RayCastData() { dist = 99999.0f; }
+	RayCastData() { dist = 99999.0f; }
 };
 
 class Fbx
