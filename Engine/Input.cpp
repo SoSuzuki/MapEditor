@@ -122,8 +122,9 @@ namespace Input
 	void SetMousePosition(int x, int y)
 	{
 		mousePosition_ = XMVectorSet((float)x, (float)y, 0, 0);
-		std::string resStr = std::to_string(x) + "," + std::to_string(y) + "\n";
-		OutputDebugString(resStr.c_str());
+		/* マウス位置のデバッグ表示 */
+		//std::string resStr = std::to_string(x) + "," + std::to_string(y) + "\n";
+		//OutputDebugString(resStr.c_str());
 	}
 
 	XMFLOAT3 GetMouseMove()
