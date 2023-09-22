@@ -1,3 +1,5 @@
+GitHub => https://github.com/SoSuzuki/MapEditor
+
 ①GE2A20 鈴木颯(220185)
 ②masterブランチに置いてあるものが利用可能なもの。マップエディタ完成版と同じように、編集モードの実装
 (地形の上げ下げ、種類の変更)をした。
