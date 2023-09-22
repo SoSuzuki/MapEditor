@@ -100,7 +100,7 @@ void Stage::Update()
             for (int y = 0; y < table_[x][z].height + 1; y++) {
 
                 RayCastData data;
-                //data.hit = false;
+                data.hit = false;
                 XMStoreFloat4(&data.start, vMouseFront);
                 XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
                 Transform trans;
@@ -204,7 +204,7 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 
 	case WM_COMMAND:
 		// ラジオボタンの切り替え
-		
+        int i;
         if (IsDlgButtonChecked(hDlg, IDC_RADIO_UP)) {
             mode_ = BLOCK_UP;
             return TRUE;

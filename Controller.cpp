@@ -40,6 +40,25 @@ void Controller::Update()
 			transform_.rotate_.x = 0;
 	}
 
+
+	if (Input::IsKey(DIK_SPACE)) {
+		transform_.position_.y += 0.05f;
+		if (transform_.position_.y > 30)
+			transform_.position_.y = 30.0f;
+	}
+
+	if (Input::IsKey(DIK_LCONTROL)) {
+		transform_.position_.y -= 0.05f;
+		if (transform_.position_.y <= 0)
+			transform_.position_.y = 0;
+	}
+
+	if (Input::IsKeyDown(DIK_R)) {
+		transform_.position_ = XMFLOAT3(7.0f, 0.0f, 7.0f);
+		transform_.rotate_ = XMFLOAT3(45.0f, 0, 0);
+	}
+
+
 	//transform_.rotate_.x“x‰ñ“]‚³‚¹‚és—ñ‚ðì¬
 	XMMATRIX mRotX = XMMatrixRotationX(XMConvertToRadians(transform_.rotate_.x));
 
