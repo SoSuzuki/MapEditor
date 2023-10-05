@@ -130,9 +130,8 @@ void Stage::Update()
     switch (mode_)
     {
     case BLOCK_UP:
-        if(isHit)
+        if (isHit)
             table_[updateX][updateZ].height++;
-            break;
         break;
     case BLOCK_DOWN:
         if(isHit)
@@ -140,7 +139,7 @@ void Stage::Update()
                 table_[updateX][updateZ].height--;
         break;
     case BLOCK_CHANGE:
-        if(isHit)
+        if (isHit)
             table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
         break;
     default:
@@ -204,7 +203,7 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 
 	case WM_COMMAND:
 		// ラジオボタンの切り替え
-        int i;
+        //int i;
         if (IsDlgButtonChecked(hDlg, IDC_RADIO_UP)) {
             mode_ = BLOCK_UP;
             return TRUE;
@@ -222,4 +221,36 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		return TRUE;
 	}
 	return FALSE;
+}
+
+void Stage::SaveMapData()
+{
+    setlocale(LC_ALL, "Japanese");
+
+    HANDLE hFile;        //ファイルのハンドル
+    hFile = CreateFile(
+        ●●●,                 //ファイル名
+        GENERIC_WRITE,           //アクセスモード（書き込み用）
+        0,                      //共有（なし）
+        NULL,                   //セキュリティ属性（継承しない）
+        OPEN_ALWAYS,           //作成方法
+        FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
+        NULL);                  //拡張属性（なし）
+    std::string data;
+    for (int x = 0; x < xSize; x++) {
+        for (int z = 0; z < zSize; z++) {
+            data += std::to_string(table_[x][z].height) + " ";
+            data += std::to_string(table_[x][z].bt) + " ";
+        }
+    }
+
+    DWORD dwBytes = 0;  //書き込み位置
+    WriteFile(
+        hFile,                      //ファイルハンドル
+        data.c_str(),               //保存するデータ（文字列）
+        (DWORD)strlen(data.c_str()),//書き込む文字数
+        &dwBytes,                   //書き込んだサイズを入れる変数
+        NULL);                      //オーバーラップド構造体（今回は使わない）
+
+    CloseHandle(hFile);
 }

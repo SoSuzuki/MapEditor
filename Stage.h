@@ -33,7 +33,7 @@ private:
         int height;
     }table_[xSize * zSize];
 #else
-    struct BrockType
+    struct BlockType
     {
         BLOCK_TYPE bt;
         int height;
@@ -72,5 +72,8 @@ public:
     void SetStackBlock(int _x, int _z, int _height);
 
     BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
+
+    //マップの高さとブロックの種類を保存
+    void SaveMapData();
 };
 

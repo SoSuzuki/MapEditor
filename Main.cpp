@@ -44,16 +44,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	//ウィンドウクラス（設計図）を作成
 	WNDCLASSEX wc;	//このインスタンスに設計項目を詰め込む
 
-	wc.cbSize = sizeof(WNDCLASSEX);             //この構造体のサイズ
-	wc.hInstance = hInstance;                   //インスタンスハンドル
+	wc.cbSize = sizeof(WNDCLASSEX);				//この構造体のサイズ
+	wc.hInstance = hInstance;					//インスタンスハンドル
 	wc.lpszClassName = WIN_CLASS_NAME;			//ウィンドウクラス名
-	wc.lpfnWndProc = WndProc;                   //ウィンドウプロシージャ
-	wc.style = CS_VREDRAW | CS_HREDRAW;         //スタイル（デフォルト）
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION); //アイコン
-	wc.hIconSm = LoadIcon(NULL, IDI_WINLOGO);   //小さいアイコン
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);   //マウスカーソル
-	wc.lpszMenuName = NULL;                     //メニュー（なし）
-	wc.cbClsExtra = 0;
+	wc.lpfnWndProc = WndProc;					//ウィンドウプロシージャ
+	wc.style = CS_VREDRAW | CS_HREDRAW;			//スタイル（デフォルト）
+	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);	//アイコン
+	wc.hIconSm = LoadIcon(NULL, IDI_WINLOGO);	//小さいアイコン
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);	//マウスカーソル
+	wc.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);//メニュー（アリ。エラー出てるが、
+	wc.cbClsExtra = 0;							 //resource.hをインクルードしてるなら気にしない）
 	wc.cbWndExtra = 0;
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH); //背景（白）
 
@@ -62,7 +62,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 	//ウィンドウサイズの計算
 	RECT winRect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 	//引数(希望するサイズ(RECT構造体)、ウィンドウスタイル、メニューバーの有無)
-	AdjustWindowRect(&winRect, WS_OVERLAPPEDWINDOW, FALSE);
+	AdjustWindowRect(&winRect, WS_OVERLAPPEDWINDOW, TRUE);	// 第3引数はメニューの有無
 	int winW = winRect.right - winRect.left;     //ウィンドウ幅
 	int winH = winRect.bottom - winRect.top;     //ウィンドウ高さ
 
