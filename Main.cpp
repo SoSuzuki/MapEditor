@@ -103,6 +103,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, 
 
 	// ダイアログボックスを作成
 	HWND hDlg = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, (DLGPROC)DialogProc);
+
+	//HWND hDlgM = CreateDialog(hInstance, MAKEINTRESOURCE(IDR_MENU1), hWnd, (DLGPROC)DialogProc);
+
 	//モーダルダイアログ版
 	// DialogBox(			);
 
@@ -196,6 +199,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);  //プログラム終了
 		return 0;
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case ID_MENU_NEW:
+			OutputDebugString("New File\n");
+			break;
+		case ID_MENU_OPEN:
+			OutputDebugString("Open File\n");
+			break;
+		case ID_MENU_SAVE:
+			OutputDebugString("Save File\n");
+			((Stage*)pRootJob->FindObject("Stage"))->Save();
+			//ファイル保存ダイアログで名前を決める
+			//決めたファイル名でセーブを実行
+			return 0;
+		}
+
 	}
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
@@ -211,3 +231,4 @@ BOOL CALLBACK DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 	//		↓1行にまとめると…
 	//((Stage*)pRootJob->FindObject("Stage"))->DialogProc(hDlg, msg, wp, lp);
 }
+

@@ -74,6 +74,6 @@ public:
     BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 
     //マップの高さとブロックの種類を保存
-    void SaveMapData();
+    void Save();
 };
 
