@@ -26,6 +26,8 @@ private:
     int hModel_[BLOCK_MAX];     //モデル番号
   //int table_[xSize * zSize];  //フロアの座標
     
+    char fileName_[MAX_PATH];  //ファイル名を入れる変数
+
 #if 0
     struct Stack
     {
@@ -75,5 +77,8 @@ public:
 
     //マップの高さとブロックの種類を保存
     void Save();
+
+    //.mapファイルをロード
+    void Load();
 };
 
