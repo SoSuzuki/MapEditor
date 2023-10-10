@@ -1,4 +1,6 @@
 #include "Stage.h"
+#include <iostream>
+#include <sstream>
 #include <string>
 #include "Engine/Model.h"
 #include "Engine/Input.h"
@@ -225,7 +227,7 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 
 void Stage::Save()
 {
-    setlocale(LC_ALL, "Japanese");
+    //setlocale(LC_ALL, "Japanese");
     char fileName[MAX_PATH] = "無題.map";  //ファイル名を入れる変数
 
     //「ファイルを保存」ダイアログの設定
@@ -235,8 +237,8 @@ void Stage::Save()
     ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")        //─┬ファイルの種類
         TEXT("すべてのファイル(*.*)\0*.*\0\0");     //─┘
     ofn.lpstrFile = fileName;               	//ファイル名
-    ofn.nMaxFile = MAX_PATH;               	//パスの最大文字数
-    ofn.Flags = OFN_OVERWRITEPROMPT;   		//フラグ（同名ファイルが存在したら上書き確認）
+    ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
+    ofn.Flags = OFN_OVERWRITEPROMPT;   		    //フラグ（同名ファイルが存在したら上書き確認）
     ofn.lpstrDefExt = "map";                  	//デフォルト拡張子
 
     //「ファイルを保存」ダイアログ
@@ -246,22 +248,31 @@ void Stage::Save()
     //キャンセルしたら中断
     if (selFile == FALSE) return;
 
+// セーブのルーチン
     HANDLE hFile;        //ファイルのハンドル
     hFile = CreateFile(
         "MapData",              //ファイル名
         GENERIC_WRITE,          //アクセスモード（書き込み用）
         0,                      //共有（なし）
         NULL,                   //セキュリティ属性（継承しない）
-        CREATE_ALWAYS,            //作成方法
+        CREATE_ALWAYS,          //作成方法
         FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
         NULL);                  //拡張属性（なし）
-    std::string data;
+
+    std::string s = "";
+
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
-            data += std::to_string(table_[x][z].height) + " ";
-            data += std::to_string(table_[x][z].bt) + " ";
+            if (z != zSize) {
+                s += std::to_string(table_[x][z].height) + ",";
+                s += std::to_string(table_[x][z].bt) + ",";
+            }
         }
+        
+        s += "\n";
     }
+
+    std::istringstream iss(s);
 
     DWORD dwBytes = 0;  //書き込み位置
     WriteFile(
@@ -270,6 +281,7 @@ void Stage::Save()
         (DWORD)strlen(data.c_str()),//書き込む文字数
         &dwBytes,                   //書き込んだサイズを入れる変数
         NULL);                      //オーバーラップド構造体（今回は使わない）
+
 
     CloseHandle(hFile);
 }
