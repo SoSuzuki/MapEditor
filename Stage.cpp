@@ -261,18 +261,27 @@ void Stage::Save()
 
     std::string s = "";
 
-    for (int z = zSize - 1; z >= 0; z--) {
+    //for (int z = zSize - 1; z >= 0; z--) {
+    //    for (int x = 0; x < xSize; x++) {
+    //        if (x != xSize - 1) {
+    //            s += std::to_string(table_[x][z].height) + ",";
+    //            s += std::to_string(table_[x][z].bt) + ",";
+    //        }
+    //        else {
+    //            s += std::to_string(table_[x][z].height) + ",";
+    //            s += std::to_string(table_[x][z].bt);
+    //        }
+    //    }
+    //    s += "\n";
+    //}
+
+    for (int z = 0; z < zSize; z++) {
         for (int x = 0; x < xSize; x++) {
             if (x != xSize - 1) {
                 s += std::to_string(table_[x][z].height) + ",";
                 s += std::to_string(table_[x][z].bt) + ",";
             }
-            else {
-                s += std::to_string(table_[x][z].height) + ",";
-                s += std::to_string(table_[x][z].bt);
-            }
         }
-        s += "\n";
     }
 
     //std::istringstream iss(s);
