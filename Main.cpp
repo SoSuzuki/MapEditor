@@ -204,10 +204,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 		case ID_MENU_NEW:
 			OutputDebugString("New File\n");
+
 			break;
 		case ID_MENU_OPEN:
 			OutputDebugString("Open File\n");
-			break;
+			((Stage*)pRootJob->FindObject("Stage"))->Load();
+			return 0;
 		case ID_MENU_SAVE:
 			OutputDebugString("Save File\n");
 			//ファイル保存ダイアログで名前を決める

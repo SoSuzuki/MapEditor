@@ -251,7 +251,7 @@ void Stage::Save()
 // セーブのルーチン
     HANDLE hFile;        //ファイルのハンドル
     hFile = CreateFile(
-        "MapData",              //ファイル名
+        fileName_,              //ファイル名
         GENERIC_WRITE,          //アクセスモード（書き込み用）
         0,                      //共有（なし）
         NULL,                   //セキュリティ属性（継承しない）
@@ -261,7 +261,7 @@ void Stage::Save()
 
     std::string s = "";
 
-    for (int z = 0; z < zSize; z++) {
+    for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
             if (x != xSize - 1) {
                 s += std::to_string(table_[x][z].height) + ",";
@@ -291,13 +291,31 @@ void Stage::Save()
 
 void Stage::Load()
 {
+    //「ファイルを保存」ダイアログの設定
+    OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
+    ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
+    ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
+    ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")        //─┬ファイルの種類
+        TEXT("すべてのファイル(*.*)\0*.*\0\0");     //─┘
+    ofn.lpstrFile = fileName_;               	//ファイル名
+    ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
+    ofn.Flags = OFN_FILEMUSTEXIST;   		    //フラグ（存在するファイルしか選べない）
+    ofn.lpstrDefExt = "map";                  	//デフォルト拡張子
+
+    //「ファイルを保存」ダイアログ
+    BOOL selFile;
+    selFile = GetOpenFileName(&ofn);
+
+    //キャンセルしたら中断
+    if (selFile == FALSE) return;
+    
     HANDLE hFile;        //ファイルのハンドル
     hFile = CreateFile(
-        fileName_,                 //ファイル名
+        fileName_,              //ファイル名
         GENERIC_READ,           //アクセスモード（読み込み用）
         0,                      //共有（なし）
         NULL,                   //セキュリティ属性（継承しない）
-        OPEN_EXISTING,           //作成方法
+        OPEN_EXISTING,          //作成方法
         FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
         NULL);                  //拡張属性（なし）
 
@@ -319,13 +337,23 @@ void Stage::Load()
 
     int index = 0; // 読み込んでる現在位置
 
-    for (int z = 0; z < zSize; z++) {
-        for (int x = 0; x < xSize; x++) {
-            while (data[index] != ',' || data[index] != '\n') {
+    for (int x = 0; x < xSize; x++) {
+        for (int z = 0; z < zSize; z++) {
+            while (data[index] != ',' && data[index] != '\n') {
                 
-                table_[x][z].height = data[x];
+                table_[x][z].height = int(data[index]- '0');
+                index++;
             }
+            index++;
+            while (data[index] != ',' && data[index] != '\n') {
+
+                table_[x][z].bt = (BLOCK_TYPE)(int(data[index] - '0'));
+                index++;
+            }
+            index++;
         }
         
     }
+
+    CloseHandle(hFile);
 }
