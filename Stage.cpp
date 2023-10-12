@@ -281,6 +281,10 @@ void Stage::Save()
                 s += std::to_string(table_[x][z].height) + ",";
                 s += std::to_string(table_[x][z].bt) + ",";
             }
+            else {
+                s += std::to_string(table_[x][z].height) + ",";
+                s += std::to_string(table_[x][z].bt);
+            }
         }
     }
 
