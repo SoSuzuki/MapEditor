@@ -350,8 +350,8 @@ void Stage::Load()
 
     int index = 0; // ì«Ç›çûÇÒÇ≈ÇÈåªç›à íu
 
-    for (int x = 0; x < xSize; x++) {
-        for (int z = 0; z < zSize; z++) {
+    for (int z = zSize - 1; z >= 0; z--) {
+        for (int x = 0; x < xSize; x++) {
             while (data[index] != ',' && data[index] != '\n') {
                 
                 table_[x][z].height = int(data[index]- '0');
