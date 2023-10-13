@@ -44,8 +44,6 @@ void Stage::Initialize()
         }
     }
 
-    // SetStackBlock(5, 5, 3); //お試し的に伸ばした
-
 }
 
 //更新
@@ -129,24 +127,37 @@ void Stage::Update()
         }
     }
 
-    switch (mode_)
-    {
-    case BLOCK_UP:
-        if (isHit)
-            table_[updateX][updateZ].height++;
-        break;
-    case BLOCK_DOWN:
-        if(isHit)
-            if (table_[updateX][updateZ].height > 0)
-                table_[updateX][updateZ].height--;
-        break;
-    case BLOCK_CHANGE:
-        if (isHit)
-            table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
-        break;
-    default:
-        break;
+    if (check_) {
+        //①最初に選択した座標のupdateX,Zを保存
+
+        //②次に選択した座標の～を保存
+
+        //③　①→②間の座標全てを保存
+
+        //④　③の配列内座標をmode_のSwitch文に適用する
     }
+    else {
+        switch (mode_)
+        {
+        case BLOCK_UP:
+            if (isHit)
+                table_[updateX][updateZ].height++;
+            break;
+        case BLOCK_DOWN:
+            if (isHit)
+                if (table_[updateX][updateZ].height > 0)
+                    table_[updateX][updateZ].height--;
+            break;
+        case BLOCK_CHANGE:
+            if (isHit)
+                table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
+            break;
+        default:
+            break;
+        }
+    }
+
+    
 }
 
 //描画
@@ -196,6 +207,9 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		// ラジオボタンの初期値
 		SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_SETCHECK, BST_CHECKED, 0);
 
+        // チェックボックスの初期値
+        SendMessage(GetDlgItem(hDlg, IDC_CHECK_SELECT), BM_SETCHECK, BST_UNCHECKED, 0);
+
 		// コンボボックスの初期値
 		for (int i = 0; i < BLOCK_TYPE::BLOCK_MAX; i++) {
 			SendMessage(GetDlgItem(hDlg, IDC_COMBO_GROUND), CB_ADDSTRING, 0, (LPARAM)blockName[i]);
@@ -205,7 +219,6 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 
 	case WM_COMMAND:
 		// ラジオボタンの切り替え
-        //int i;
         if (IsDlgButtonChecked(hDlg, IDC_RADIO_UP)) {
             mode_ = BLOCK_UP;
             return TRUE;
@@ -219,6 +232,11 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 			mode_ = BLOCK_CHANGE;
             return TRUE;
 		}
+
+        // チェックボックスの切り替え
+        if (IsDlgButtonChecked(hDlg, IDC_CHECK_SELECT)) {
+
+        }
 
 		return TRUE;
 	}
@@ -261,20 +279,6 @@ void Stage::Save()
 
     std::string s = "";
 
-    //for (int z = zSize - 1; z >= 0; z--) {
-    //    for (int x = 0; x < xSize; x++) {
-    //        if (x != xSize - 1) {
-    //            s += std::to_string(table_[x][z].height) + ",";
-    //            s += std::to_string(table_[x][z].bt) + ",";
-    //        }
-    //        else {
-    //            s += std::to_string(table_[x][z].height) + ",";
-    //            s += std::to_string(table_[x][z].bt);
-    //        }
-    //    }
-    //    s += "\n";
-    //}
-
     for (int z = 0; z < zSize; z++) {
         for (int x = 0; x < xSize; x++) {
             if (x != xSize - 1) {
@@ -287,8 +291,6 @@ void Stage::Save()
             }
         }
     }
-
-    //std::istringstream iss(s);
 
     DWORD dwBytes = 0;  //書き込み位置
     WriteFile(

@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>    // プロシージャのために必要
+#include <list>
 #include "Engine/GameObject.h"
 #include "Engine/Direct3D.h"
 
@@ -48,7 +49,8 @@ private:
     };
 #endif
     int mode_;  // 0:上げる 1:下げる 2:種類を変える
-    int select_;    // 種類
+    int select_;// ブロックの種類
+    bool check_;// チェックがついているか
 
 public:
     //コンストラクタ
