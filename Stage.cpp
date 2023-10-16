@@ -7,7 +7,7 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題.map" }
+    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題.map" },check_(false)
 {
 }
 
@@ -18,7 +18,7 @@ Stage::~Stage()
 //初期化
 void Stage::Initialize()
 {
-
+    
 	std::string modelName[] = {
 		"BoxDefault.fbx",
 		"BoxBrick.fbx",
@@ -193,10 +193,6 @@ void Stage::SetStackBlock(int _x, int _z, int _height)
     table_[_x][_z].height = _height;
 }
 
-void Stage::RayCastLoop()
-{
-}
-
 //ダイアログ用のプロシージャ（戻り値はbool）
 // クラスでプロシージャが使えないので、偽物としてついでに呼ばれるようにすれば
 // 実質クラスで使用していることになる
@@ -238,10 +234,11 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
         // チェックボックスの切り替え
         if (IsDlgButtonChecked(hDlg, IDC_CHECK_SELECT)) {
             check_ = true;
-
+            return TRUE;
         }
         else {
             check_ = false;
+            return FALSE;
         }
 
 		return TRUE;
