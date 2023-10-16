@@ -1,6 +1,8 @@
 #pragma once
 #include <Windows.h>    // プロシージャのために必要
-#include <list>
+#include <iostream>
+#include <bitset>
+#include <string>
 #include "Engine/GameObject.h"
 #include "Engine/Direct3D.h"
 
@@ -82,5 +84,7 @@ public:
 
     //.mapファイルをロード
     void Load();
+
+    
 };
 

@@ -1,7 +1,4 @@
 #include "Stage.h"
-#include <iostream>
-#include <sstream>
-#include <string>
 #include "Engine/Model.h"
 #include "Engine/Input.h"
 #include "resource.h"
@@ -280,20 +277,23 @@ void Stage::Save()
         FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
         NULL);                  //拡張属性（なし）
 
-    std::string s = "";
+    //std::string s = "";
+    const char* binary[300] = {};
+
 
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
             if (x != xSize - 1) {
-                s += std::to_string(table_[x][z].height) + ",";
-                s += std::to_string(table_[x][z].bt) + ",";
+                binary += char(table_[x][z].height + '0') + ' ';
+                binary += char(table_[x][z].bt + '0') + ' ';
             }
             else {
-                s += std::to_string(table_[x][z].height) + ",";
+                s += std::to_string(table_[x][z].height) + ' ';
                 s += std::to_string(table_[x][z].bt) + '\n';
             }
         }
     }
+
 
     DWORD dwBytes = 0;  //書き込み位置
     WriteFile(
