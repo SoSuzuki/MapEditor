@@ -75,6 +75,8 @@ public:
 
     void SetStackBlock(int _x, int _z, int _height);
 
+    void RayCastLoop();
+
     BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 
     //マップの高さとブロックの種類を保存

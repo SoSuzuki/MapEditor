@@ -94,11 +94,10 @@ void Stage::Update()
     int updateX = 0, updateZ = 0;
     bool isHit = false;
 
+    //範囲選択モードだと「押して即判定」するこのfor文は好ましくない
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
-            
             for (int y = 0; y < table_[x][z].height + 1; y++) {
-
                 RayCastData data;
                 data.hit = false;
                 XMStoreFloat4(&data.start, vMouseFront);
@@ -118,7 +117,6 @@ void Stage::Update()
                         minDist = data.dist;
                         updateX = x;
                         updateZ = z;
-
                     }
                     data.hit = false;
                     isHit = true;
@@ -195,6 +193,10 @@ void Stage::SetStackBlock(int _x, int _z, int _height)
     table_[_x][_z].height = _height;
 }
 
+void Stage::RayCastLoop()
+{
+}
+
 //ダイアログ用のプロシージャ（戻り値はbool）
 // クラスでプロシージャが使えないので、偽物としてついでに呼ばれるようにすれば
 // 実質クラスで使用していることになる
@@ -237,6 +239,9 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
         if (IsDlgButtonChecked(hDlg, IDC_CHECK_SELECT)) {
             check_ = true;
 
+        }
+        else {
+            check_ = false;
         }
 
 		return TRUE;
@@ -356,14 +361,12 @@ void Stage::Load()
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
             while (data[index] != ',' && data[index] != '\n') {
-                
-                table_[x][z].height = int(data[index]- '0');
+                SetStackBlock(x, z, int(data[index] - '0'));
                 index++;
             }
             index++;
             while (data[index] != ',' && data[index] != '\n') {
-
-                table_[x][z].bt = (BLOCK_TYPE)(int(data[index] - '0'));
+                SetBlock(x, z, (BLOCK_TYPE)(int(data[index] - '0')));
                 index++;
             }
             index++;
