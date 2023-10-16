@@ -235,6 +235,7 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 
         // チェックボックスの切り替え
         if (IsDlgButtonChecked(hDlg, IDC_CHECK_SELECT)) {
+            check_ = true;
 
         }
 
@@ -279,7 +280,7 @@ void Stage::Save()
 
     std::string s = "";
 
-    for (int z = 0; z < zSize; z++) {
+    for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
             if (x != xSize - 1) {
                 s += std::to_string(table_[x][z].height) + ",";
@@ -287,7 +288,7 @@ void Stage::Save()
             }
             else {
                 s += std::to_string(table_[x][z].height) + ",";
-                s += std::to_string(table_[x][z].bt);
+                s += std::to_string(table_[x][z].bt) + '\n';
             }
         }
     }
@@ -295,8 +296,8 @@ void Stage::Save()
     DWORD dwBytes = 0;  //書き込み位置
     WriteFile(
         hFile,                      //ファイルハンドル
-        s.c_str(),               //保存するデータ（文字列）
-        (DWORD)strlen(s.c_str()),//書き込む文字数
+        s.c_str(),                  //保存するデータ（文字列）
+        (DWORD)strlen(s.c_str()),   //書き込む文字数
         &dwBytes,                   //書き込んだサイズを入れる変数
         NULL);                      //オーバーラップド構造体（今回は使わない）
 
