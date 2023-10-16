@@ -277,23 +277,22 @@ void Stage::Save()
         FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
         NULL);                  //拡張属性（なし）
 
-    //std::string s = "";
-    const char* binary[300] = {};
-
+    std::stringstream ss;
 
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
             if (x != xSize - 1) {
-                binary += char(table_[x][z].height + '0') + ' ';
-                binary += char(table_[x][z].bt + '0') + ' ';
+                ss << "0b" << std::bitset<8>(table_[x][z].height) << ' ';
+                ss << "0b" << std::bitset<8>(table_[x][z].bt) << ' ';
             }
             else {
-                s += std::to_string(table_[x][z].height) + ' ';
-                s += std::to_string(table_[x][z].bt) + '\n';
+                ss << "0b" << std::bitset<8>(table_[x][z].height) << ' ';
+                ss << "0b" << std::bitset<8>(table_[x][z].bt) << '\n';
             }
         }
     }
-
+    
+    std::string s = ss.str();
 
     DWORD dwBytes = 0;  //書き込み位置
     WriteFile(
@@ -357,15 +356,22 @@ void Stage::Load()
 
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
-            while (data[index] != ',' && data[index] != '\n') {
-                SetStackBlock(x, z, int(data[index] - '0'));
+            std::string sBinH = ""; // Heightのバイナリデータ(文字列)を入れる
+            while (data[index] != ' ' && data[index] != '\n') {
+                sBinH += data[index];
                 index++;
             }
+            // バイナリから10進数に変換→table_の該当座標に代入→index増分
+            int sIntH = std::stoi(sBinH);
+            SetStackBlock(x, z, sIntH);
             index++;
-            while (data[index] != ',' && data[index] != '\n') {
-                SetBlock(x, z, (BLOCK_TYPE)(int(data[index] - '0')));
+            std::string sBinB = ""; // BlockTypeのバイナリデータ(文字列)を入れる
+            while (data[index] != ' ' && data[index] != '\n') {
+                sBinB += data[index];
                 index++;
             }
+            int sIntB = std::stoi(sBinB);
+            SetBlock(x, z, (BLOCK_TYPE)sIntB);
             index++;
         }
         

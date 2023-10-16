@@ -1,6 +1,6 @@
 #pragma once
 #include <Windows.h>    // プロシージャのために必要
-#include <iostream>
+#include <sstream>
 #include <bitset>
 #include <string>
 #include "Engine/GameObject.h"
