@@ -52,7 +52,7 @@ private:
 #endif
     int mode_;  // 0:上げる 1:下げる 2:種類を変える
     int select_;// ブロックの種類
-    bool check_;// チェックがついているか
+    bool isRangeSelect_;// チェックがついているか
 
 public:
     //コンストラクタ
@@ -79,12 +79,16 @@ public:
 
     BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 
-    //マップの高さとブロックの種類を保存
+    // 新規作成
+    void NewCreateSave();
+
+    // マップの高さとブロックの種類を保存
     void Save();
 
     //.mapファイルをロード
     void Load();
 
-    
+    // バイナリ文字列を符号なし整数に変換
+    unsigned int btoi(const std::string& _bin);
 };
 

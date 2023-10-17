@@ -203,19 +203,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam))
 		{
 		case ID_MENU_NEW:
-			OutputDebugString("New File\n");
-
+			/*OutputDebugString("New File\n");*/
+			
+			((Stage*)pRootJob->FindObject("Stage"))->NewCreateSave();
 			break;
 		case ID_MENU_OPEN:
-			OutputDebugString("Open File\n");
+			/*OutputDebugString("Open File\n");*/
+			
 			((Stage*)pRootJob->FindObject("Stage"))->Load();
 			return 0;
 		case ID_MENU_SAVE:
-			OutputDebugString("Save File\n");
+			/*OutputDebugString("Save File\n");*/
+
 			//ファイル保存ダイアログで名前を決める
 			//決めたファイル名でセーブを実行
 			((Stage*)pRootJob->FindObject("Stage"))->Save();
-
 			return 0;
 		}
 

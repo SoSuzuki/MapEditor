@@ -4,7 +4,7 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題.map" },check_(false)
+    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題.map" }, isRangeSelect_(false)
 {
 }
 
@@ -40,6 +40,8 @@ void Stage::Initialize()
 
         }
     }
+
+    Load();
 
 }
 
@@ -91,47 +93,45 @@ void Stage::Update()
     int updateX = 0, updateZ = 0;
     bool isHit = false;
 
-    //範囲選択モードだと「押して即判定」するこのfor文は好ましくない
-    for (int x = 0; x < xSize; x++) {
-        for (int z = 0; z < zSize; z++) {
-            for (int y = 0; y < table_[x][z].height + 1; y++) {
-                RayCastData data;
-                data.hit = false;
-                XMStoreFloat4(&data.start, vMouseFront);
-                XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
-                Transform trans;
-                trans.position_.x = x;
-                trans.position_.z = z;
-                trans.position_.y = y;
-                
-                Model::SetTransform(hModel_[0], trans);
 
-                Model::RayCast(hModel_[0], data);
-
-                //⑥ レイが当たったらブレークポイントで止めて確認
-                if (data.hit) {
-                    if (minDist > data.dist) {
-                        minDist = data.dist;
-                        updateX = x;
-                        updateZ = z;
-                    }
-                    data.hit = false;
-                    isHit = true;
-                }
-            }
-        }
-    }
-
-    if (check_) {
+    if (isRangeSelect_) {
         //①最初に選択した座標のupdateX,Zを保存
-
         //②次に選択した座標の～を保存
-
         //③　①→②間の座標全てを保存
-
         //④　③の配列内座標をmode_のSwitch文に適用する
     }
     else {
+        //範囲選択モードだと「押して即判定」するこのfor文は好ましくない
+        for (int x = 0; x < xSize; x++) {
+            for (int z = 0; z < zSize; z++) {
+                for (int y = 0; y < table_[x][z].height + 1; y++) {
+                    RayCastData data;
+                    data.hit = false;
+                    XMStoreFloat4(&data.start, vMouseFront);
+                    XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
+                    Transform trans;
+                    trans.position_.x = x;
+                    trans.position_.z = z;
+                    trans.position_.y = y;
+
+                    Model::SetTransform(hModel_[0], trans);
+
+                    Model::RayCast(hModel_[0], data);
+
+                    //⑥ レイが当たったらブレークポイントで止めて確認
+                    if (data.hit) {
+                        if (minDist > data.dist) {
+                            minDist = data.dist;
+                            updateX = x;
+                            updateZ = z;
+                        }
+                        data.hit = false;
+                        isHit = true;
+                    }
+                }
+            }
+        }
+
         switch (mode_)
         {
         case BLOCK_UP:
@@ -230,12 +230,12 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 
         // チェックボックスの切り替え
         if (IsDlgButtonChecked(hDlg, IDC_CHECK_SELECT)) {
-            check_ = true;
+            isRangeSelect_ = true;
             return TRUE;
         }
         else {
-            check_ = false;
-            return FALSE;
+            isRangeSelect_ = false;
+            return TRUE;
         }
 
 		return TRUE;
@@ -243,11 +243,8 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 	return FALSE;
 }
 
-void Stage::Save()
+void Stage::NewCreateSave()
 {
-    //setlocale(LC_ALL, "Japanese");
-    
-
     //「ファイルを保存」ダイアログの設定
     OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
     ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
@@ -266,6 +263,49 @@ void Stage::Save()
     //キャンセルしたら中断
     if (selFile == FALSE) return;
 
+    // セーブのルーチン
+    HANDLE hFile;        //ファイルのハンドル
+    hFile = CreateFile(
+        fileName_,              //ファイル名
+        GENERIC_WRITE,          //アクセスモード（書き込み用）
+        0,                      //共有（なし）
+        NULL,                   //セキュリティ属性（継承しない）
+        CREATE_ALWAYS,          //作成方法
+        FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
+        NULL);                  //拡張属性（なし）
+
+    std::stringstream ss;
+
+    for (int z = zSize - 1; z >= 0; z--) {
+        for (int x = 0; x < xSize; x++) {
+            if (x != xSize - 1) {
+                ss << std::bitset<8>(table_[x][z].height) << ' ';
+                ss << std::bitset<8>(table_[x][z].bt) << ' ';
+            }
+            else {
+                ss << std::bitset<8>(table_[x][z].height) << ' ';
+                ss << std::bitset<8>(table_[x][z].bt) << '\n';
+            }
+        }
+    }
+
+    std::string s = ss.str();
+
+    DWORD dwBytes = 0;  //書き込み位置
+    WriteFile(
+        hFile,                      //ファイルハンドル
+        s.c_str(),                  //保存するデータ（文字列）
+        (DWORD)strlen(s.c_str()),   //書き込む文字数
+        &dwBytes,                   //書き込んだサイズを入れる変数
+        NULL);                      //オーバーラップド構造体（今回は使わない）
+
+
+    CloseHandle(hFile);
+}
+
+void Stage::Save()
+{
+
 // セーブのルーチン
     HANDLE hFile;        //ファイルのハンドル
     hFile = CreateFile(
@@ -282,12 +322,12 @@ void Stage::Save()
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
             if (x != xSize - 1) {
-                ss << "0b" << std::bitset<8>(table_[x][z].height) << ' ';
-                ss << "0b" << std::bitset<8>(table_[x][z].bt) << ' ';
+                ss << std::bitset<8>(table_[x][z].height) << ' ';
+                ss << std::bitset<8>(table_[x][z].bt) << ' ';
             }
             else {
-                ss << "0b" << std::bitset<8>(table_[x][z].height) << ' ';
-                ss << "0b" << std::bitset<8>(table_[x][z].bt) << '\n';
+                ss << std::bitset<8>(table_[x][z].height) << ' ';
+                ss << std::bitset<8>(table_[x][z].bt) << '\n';
             }
         }
     }
@@ -362,7 +402,7 @@ void Stage::Load()
                 index++;
             }
             // バイナリから10進数に変換→table_の該当座標に代入→index増分
-            int sIntH = std::stoi(sBinH);
+            int sIntH = btoi(sBinH);
             SetStackBlock(x, z, sIntH);
             index++;
             std::string sBinB = ""; // BlockTypeのバイナリデータ(文字列)を入れる
@@ -370,7 +410,7 @@ void Stage::Load()
                 sBinB += data[index];
                 index++;
             }
-            int sIntB = std::stoi(sBinB);
+            int sIntB = btoi(sBinB);
             SetBlock(x, z, (BLOCK_TYPE)sIntB);
             index++;
         }
@@ -378,4 +418,9 @@ void Stage::Load()
     }
 
     CloseHandle(hFile);
+}
+
+unsigned int Stage::btoi(const std::string& _bin)
+{
+    return strtoul(_bin.c_str(), NULL, 2);
 }
