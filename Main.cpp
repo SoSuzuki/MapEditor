@@ -202,11 +202,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
-		case ID_MENU_NEW:
+		case ID_MENU_SIZE_CHANGE:
+			//((Stage*)pRootJob->FindObject("Stage"))->SizeChange();
+			return 0;
+		case ID_MENU_SAVE_NAME:
 			/*OutputDebugString("New File\n");*/
 			
-			((Stage*)pRootJob->FindObject("Stage"))->NewCreateSave();
-			break;
+			((Stage*)pRootJob->FindObject("Stage"))->SaveAsFile();
+			return 0;
 		case ID_MENU_OPEN:
 			/*OutputDebugString("Open File\n");*/
 			

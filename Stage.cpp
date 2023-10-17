@@ -4,7 +4,7 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題.map" }, isRangeSelect_(false)
+    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題.map" }
 {
 }
 
@@ -31,8 +31,9 @@ void Stage::Initialize()
         hModel_[i] = Model::Load(fnameBase + modelName[i]);
         assert(hModel_[i] >= 0);
     }
-
+    
     // tableにブロックのタイプをセット
+    table_.resize(xSize, std::vector<BlockType>(zSize));
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
             table_[x][z].bt = DEFAULT;
@@ -93,63 +94,53 @@ void Stage::Update()
     int updateX = 0, updateZ = 0;
     bool isHit = false;
 
+    for (int x = 0; x < xSize; x++) {
+        for (int z = 0; z < zSize; z++) {
+            for (int y = 0; y < table_[x][z].height + 1; y++) {
+                RayCastData data;
+                data.hit = false;
+                XMStoreFloat4(&data.start, vMouseFront);
+                XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
+                Transform trans;
+                trans.position_.x = x;
+                trans.position_.z = z;
+                trans.position_.y = y;
+                    
+                Model::SetTransform(hModel_[0], trans);
 
-    if (isRangeSelect_) {
-        //①最初に選択した座標のupdateX,Zを保存
-        //②次に選択した座標の～を保存
-        //③　①→②間の座標全てを保存
-        //④　③の配列内座標をmode_のSwitch文に適用する
-    }
-    else {
-        //範囲選択モードだと「押して即判定」するこのfor文は好ましくない
-        for (int x = 0; x < xSize; x++) {
-            for (int z = 0; z < zSize; z++) {
-                for (int y = 0; y < table_[x][z].height + 1; y++) {
-                    RayCastData data;
-                    data.hit = false;
-                    XMStoreFloat4(&data.start, vMouseFront);
-                    XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
-                    Transform trans;
-                    trans.position_.x = x;
-                    trans.position_.z = z;
-                    trans.position_.y = y;
+                Model::RayCast(hModel_[0], data);
 
-                    Model::SetTransform(hModel_[0], trans);
-
-                    Model::RayCast(hModel_[0], data);
-
-                    //⑥ レイが当たったらブレークポイントで止めて確認
-                    if (data.hit) {
-                        if (minDist > data.dist) {
-                            minDist = data.dist;
-                            updateX = x;
-                            updateZ = z;
-                        }
-                        data.hit = false;
-                        isHit = true;
+                //⑥ レイが当たったらブレークポイントで止めて確認
+                if (data.hit) {
+                    if (minDist > data.dist) {
+                        minDist = data.dist;
+                        updateX = x;
+                        updateZ = z;
                     }
+                    data.hit = false;
+                    isHit = true;
                 }
             }
         }
+    }
 
-        switch (mode_)
-        {
-        case BLOCK_UP:
-            if (isHit)
-                table_[updateX][updateZ].height++;
-            break;
-        case BLOCK_DOWN:
-            if (isHit)
-                if (table_[updateX][updateZ].height > 0)
-                    table_[updateX][updateZ].height--;
-            break;
-        case BLOCK_CHANGE:
-            if (isHit)
-                table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
-            break;
-        default:
-            break;
-        }
+    switch (mode_)
+    {
+    case BLOCK_UP:
+        if (isHit)
+            table_[updateX][updateZ].height++;
+        break;
+    case BLOCK_DOWN:
+        if (isHit)
+            if (table_[updateX][updateZ].height > 0)
+                table_[updateX][updateZ].height--;
+        break;
+    case BLOCK_CHANGE:
+        if (isHit)
+            table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
+        break;
+    default:
+        break;
     }
 
     
@@ -190,6 +181,20 @@ void Stage::SetStackBlock(int _x, int _z, int _height)
     table_[_x][_z].height = _height;
 }
 
+void Stage::TableSizeChange(int _x, int _z)
+{
+    xSize = _x;
+    zSize = _z;
+
+    table_.resize(xSize, std::vector<BlockType>(zSize));
+    for (int x = 0; x < xSize; x++) {
+        for (int z = 0; z < zSize; z++) {
+            table_[x][z].bt = DEFAULT;
+            table_[x][z].height = 0;
+        }
+    }
+}
+
 //ダイアログ用のプロシージャ（戻り値はbool）
 // クラスでプロシージャが使えないので、偽物としてついでに呼ばれるようにすれば
 // 実質クラスで使用していることになる
@@ -201,9 +206,6 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 	case WM_INITDIALOG:
 		// ラジオボタンの初期値
 		SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_SETCHECK, BST_CHECKED, 0);
-
-        // チェックボックスの初期値
-        SendMessage(GetDlgItem(hDlg, IDC_CHECK_SELECT), BM_SETCHECK, BST_UNCHECKED, 0);
 
 		// コンボボックスの初期値
 		for (int i = 0; i < BLOCK_TYPE::BLOCK_MAX; i++) {
@@ -228,22 +230,20 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
             return TRUE;
 		}
 
-        // チェックボックスの切り替え
-        if (IsDlgButtonChecked(hDlg, IDC_CHECK_SELECT)) {
-            isRangeSelect_ = true;
-            return TRUE;
-        }
-        else {
-            isRangeSelect_ = false;
-            return TRUE;
-        }
-
 		return TRUE;
 	}
 	return FALSE;
 }
 
-void Stage::NewCreateSave()
+void Stage::SizeChange()
+{
+    //サイズを変更ボタンでテーブルサイズを変えたい
+    //変えるときに、「今までの変更は消えるけど大丈夫？」的な確認用のダイアログを出したいよね
+
+    //TableSizeChange();
+}
+
+void Stage::SaveAsFile()
 {
     //「ファイルを保存」ダイアログの設定
     OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
@@ -345,6 +345,7 @@ void Stage::Save()
 
     CloseHandle(hFile);
 }
+
 
 void Stage::Load()
 {

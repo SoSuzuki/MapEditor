@@ -2,13 +2,14 @@
 #include <Windows.h>    // プロシージャのために必要
 #include <sstream>
 #include <bitset>
+#include <vector>
 #include <string>
 #include "Engine/GameObject.h"
 #include "Engine/Direct3D.h"
 
 
 namespace {
-    const int xSize = 15, zSize = 15;//フロアのx,z座標
+    int xSize = 15, zSize = 15;//フロアのx,z座標
     const int ySize = 1;
     enum BLOCK_TYPE {
         DEFAULT = 0,
@@ -42,7 +43,8 @@ private:
     {
         BLOCK_TYPE bt;
         int height;
-    }table_[xSize][zSize];
+    };
+    std::vector<std::vector<BlockType>> table_;
 
     enum {
         BLOCK_UP = 0,
@@ -52,8 +54,7 @@ private:
 #endif
     int mode_;  // 0:上げる 1:下げる 2:種類を変える
     int select_;// ブロックの種類
-    bool isRangeSelect_;// チェックがついているか
-
+   
 public:
     //コンストラクタ
     Stage(GameObject* parent);
@@ -77,10 +78,15 @@ public:
 
     void SetStackBlock(int _x, int _z, int _height);
 
+    void TableSizeChange(int _x, int _z);
+
     BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 
-    // 新規作成
-    void NewCreateSave();
+    // サイズ変更
+    void SizeChange();
+
+    // 名前を付けて保存
+    void SaveAsFile();
 
     // マップの高さとブロックの種類を保存
     void Save();
