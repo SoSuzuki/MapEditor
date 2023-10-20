@@ -53,8 +53,7 @@ private:
 #endif
     int mode_;  // 0:上げる 1:下げる 2:種類を変える
     int select_;// ブロックの種類
-    bool isRangeSelect_;// チェックがついているか
-
+   
 public:
     //コンストラクタ
     Stage(GameObject* parent);
@@ -83,8 +82,10 @@ public:
 
     BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 
+    // サイズ変更
     void SizeChange();
 
+    // 名前を付けて保存
     void SaveAsFile();
 
     // マップの高さとブロックの種類を保存
