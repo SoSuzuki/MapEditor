@@ -8,7 +8,7 @@
 
 
 namespace {
-    const int xSize = 15, zSize = 15;//フロアのx,z座標
+    int xSize = 15, zSize = 15;//フロアのx,z座標
     const int ySize = 1;
     enum BLOCK_TYPE {
         DEFAULT = 0,
@@ -42,7 +42,8 @@ private:
     {
         BLOCK_TYPE bt;
         int height;
-    }table_[xSize][zSize];
+    };
+    std::vector<std::vector<BlockType>>table_;
 
     enum {
         BLOCK_UP = 0,
@@ -77,10 +78,14 @@ public:
 
     void SetStackBlock(int _x, int _z, int _height);
 
+    // サイズ変更
+    void TableSizeChange(int _x, int _z);
+
     BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 
-    // 新規作成
-    void NewCreateSave();
+    void SizeChange();
+
+    void SaveAsFile();
 
     // マップの高さとブロックの種類を保存
     void Save();
