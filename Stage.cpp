@@ -240,7 +240,88 @@ void Stage::SizeChange()
     //サイズを変更ボタンでテーブルサイズを変えたい
     //変えるときに、「今までの変更は消えるけど大丈夫？」的な確認用のダイアログを出したいよね
 
-    //TableSizeChange();
+    int sizeX = 0, sizeZ = 0;
+
+    //「ファイルを保存」ダイアログの設定
+    OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
+    ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
+    ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
+    ofn.lpstrFilter = TEXT("テキストファイル(*.txt)\0*.txt\0")        //─┬ファイルの種類
+        TEXT("すべてのファイル(*.*)\0*.*\0\0");     //─┘
+    ofn.lpstrFile = fileName_;               	//ファイル名
+    ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
+    ofn.Flags = OFN_FILEMUSTEXIST;   		    //フラグ（存在するファイルしか選べない）
+    ofn.lpstrDefExt = "txt";                  	//デフォルト拡張子
+
+    //「ファイルを保存」ダイアログ
+    BOOL selFile;
+    selFile = GetOpenFileName(&ofn);
+
+    //キャンセルしたら中断
+    if (selFile == FALSE) return;
+
+    HANDLE hFile;        //ファイルのハンドル
+    hFile = CreateFile(
+        "MapSize.txt",              //ファイル名
+        GENERIC_READ,           //アクセスモード（読み込み用）
+        0,                      //共有（なし）
+        NULL,                   //セキュリティ属性（継承しない）
+        OPEN_EXISTING,          //作成方法
+        FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
+        NULL);                  //拡張属性（なし）
+
+    //ファイルのサイズを取得
+    DWORD fileSize = GetFileSize(hFile, NULL);
+
+    //ファイルのサイズ分メモリを確保
+    char* data;
+    data = new char[fileSize];
+
+    DWORD dwBytes = 0; //読み込み位置
+
+    ReadFile(
+        hFile,     //ファイルハンドル
+        data,      //データを入れる変数
+        fileSize,  //読み込むサイズ
+        &dwBytes,  //読み込んだサイズ
+        NULL);     //オーバーラップド構造体（今回は使わない）
+
+    int index = 0; // 読み込んでる現在位置
+
+    std::string buffX = ""; // Xの数値データを入れる
+    while (data[index] != ' ' && data[index] != '\n') {
+        buffX += data[index];
+        index++;
+    }
+    assert(("Error: Not in the specified format!", buffX[0] != 'X'));
+    index++;
+    std::string buffZ = ""; // Xの数値データを入れる
+    while (data[index] != ' ' && data[index] != '\n') {
+        buffZ += data[index];
+        index++;
+    }
+    assert(("Error: Not in the specified format!", buffZ[0] != 'Z'));
+    index++;
+
+    CloseHandle(hFile);
+
+
+    // XとZの文字を無視して数字だけ
+    const char* const processX = &buffX[1];
+    std::string dataX = "";
+    for (int i = 0; i < sizeof(processX); i++) {
+        dataX += processX[i];
+    }
+    std::stoi(dataX, nullptr, 10);
+
+    const char* const processZ = &buffZ[1];
+    std::string dataZ = "";
+    for (int i = 0; i < sizeof(processZ); i++) {
+        dataZ += processZ[i];
+    }
+    
+
+    TableSizeChange(std::stoi(dataX, nullptr, 10),std::stoi(dataZ, nullptr, 10));
 }
 
 void Stage::SaveAsFile()

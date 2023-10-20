@@ -16,15 +16,15 @@
 #define ID_MENU_OPEN                    40005
 #define ID_MENU_SAVE                    40006
 #define ID_MENU_SAVE_NAME               40007
-#define ID_MENU_SIZE_CHANGE				40008
+#define ID_MENU_SIZE_CHANGE             40008
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        106
+#define _APS_NEXT_RESOURCE_VALUE        108
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1016
+#define _APS_NEXT_CONTROL_VALUE         1017
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
