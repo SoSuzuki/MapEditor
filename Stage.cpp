@@ -293,14 +293,14 @@ void Stage::SizeChange()
         buffX += data[index];
         index++;
     }
-    assert(("Error: Not in the specified format!", buffX[0] != 'X'));
+    assert(("Error: Not in the specified format!", buffX[0] != ('X'||'x')));
     index++;
     std::string buffZ = ""; // Xの数値データを入れる
-    while (data[index] != ' ' && data[index] != '\n') {
+    while (data[index] != ' ' && data[index] != '\0') {
         buffZ += data[index];
         index++;
     }
-    assert(("Error: Not in the specified format!", buffZ[0] != 'Z'));
+    assert(("Error: Not in the specified format!", buffZ[0] != ('Z' || 'z')));
     index++;
 
     CloseHandle(hFile);
@@ -330,8 +330,8 @@ void Stage::SaveAsFile()
     OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
     ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
     ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
-    ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")        //─┬ファイルの種類
-        TEXT("すべてのファイル(*.*)\0*.*\0\0");     //─┘
+    ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")      //─┬ファイルの種類
+        TEXT("すべてのファイル(*.*)\0*.*\0\0");                 //─┘
     ofn.lpstrFile = fileName_;               	//ファイル名
     ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
     ofn.Flags = OFN_OVERWRITEPROMPT;   		    //フラグ（同名ファイルが存在したら上書き確認）
@@ -345,6 +345,7 @@ void Stage::SaveAsFile()
     if (selFile == FALSE) return;
 
     // セーブのルーチン
+#if 0
     HANDLE hFile;        //ファイルのハンドル
     hFile = CreateFile(
         fileName_,              //ファイル名
@@ -379,9 +380,16 @@ void Stage::SaveAsFile()
         (DWORD)strlen(s.c_str()),   //書き込む文字数
         &dwBytes,                   //書き込んだサイズを入れる変数
         NULL);                      //オーバーラップド構造体（今回は使わない）
-
-
+    
     CloseHandle(hFile);
+
+#else
+    //本当の意味でのバイナリファイルで読み込みたい
+    std::ofstream fout;
+
+
+#endif
+
 }
 
 void Stage::Save()
@@ -434,12 +442,17 @@ void Stage::Load()
     OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
     ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
     ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
-    ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")        //─┬ファイルの種類
-        TEXT("すべてのファイル(*.*)\0*.*\0\0");     //─┘
+#if 0
+    ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")  //─┬ファイルの種類
+        TEXT("すべてのファイル(*.*)\0*.*\0\0");             //─┘
+#else
+    ofn.lpstrFilter = TEXT("マップデータ(*.bin)\0*.bin\0")      //─┬ファイルの種類
+    TEXT("すべてのファイル(*.*)\0*.*\0\0");                 //─┘
+#endif
     ofn.lpstrFile = fileName_;               	//ファイル名
     ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
     ofn.Flags = OFN_FILEMUSTEXIST;   		    //フラグ（存在するファイルしか選べない）
-    ofn.lpstrDefExt = "map";                  	//デフォルト拡張子
+    ofn.lpstrDefExt = "bin";                  	//デフォルト拡張子
 
     //「ファイルを保存」ダイアログ
     BOOL selFile;
