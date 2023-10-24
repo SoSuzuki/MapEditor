@@ -45,6 +45,8 @@ private:
         int height;
     };
     std::vector<std::vector<BlockType>>table_;
+    int blockHeight_;
+    int blockType_;
 
     enum {
         BLOCK_UP = 0,
@@ -95,7 +97,5 @@ public:
     //.mapファイルをロード
     void Load();
 
-    // バイナリ文字列を符号なし整数に変換
-    unsigned int btoi(const std::string& _bin);
 };
 

@@ -4,7 +4,7 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題.map" }
+    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題.bin" },blockHeight_(0),blockType_(0)
 {
 }
 
@@ -326,6 +326,8 @@ void Stage::SizeChange()
 
 void Stage::SaveAsFile()
 {
+    
+#if 0
     //「ファイルを保存」ダイアログの設定
     OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
     ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
@@ -345,7 +347,6 @@ void Stage::SaveAsFile()
     if (selFile == FALSE) return;
 
     // セーブのルーチン
-#if 0
     HANDLE hFile;        //ファイルのハンドル
     hFile = CreateFile(
         fileName_,              //ファイル名
@@ -384,9 +385,39 @@ void Stage::SaveAsFile()
     CloseHandle(hFile);
 
 #else
-    //本当の意味でのバイナリファイルで読み込みたい
-    std::ofstream fout;
+    //バイナリ編
+    //「ファイルを保存」ダイアログの設定
+    OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
+    ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
+    ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
+    ofn.lpstrFilter = TEXT("マップデータ(*.bin)\0*.bin\0")      //─┬ファイルの種類
+        TEXT("すべてのファイル(*.*)\0*.*\0\0");                 //─┘
+    ofn.lpstrFile = fileName_;               	//ファイル名
+    ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
+    ofn.Flags = OFN_OVERWRITEPROMPT;   		    //フラグ（同名ファイルが存在したら上書き確認）
+    ofn.lpstrDefExt = "bin";                  	//デフォルト拡張子
 
+    //「ファイルを保存」ダイアログ
+    BOOL selFile;
+    selFile = GetSaveFileName(&ofn);
+
+    //キャンセルしたら中断
+    if (selFile == FALSE) return;
+
+
+
+    std::ofstream fout(fileName_, std::ios_base::out | std::ios_base::binary);
+    //assert(("File open failed", !fout));
+    int block = 0;
+    for (int z = zSize - 1; z >= 0; z--) {
+        for (int x = 0; x < xSize; x++) {
+            fout.write((const char*)&table_[x][z].height,sizeof(table_[x][z].height));
+            block = table_[x][z].bt;
+            fout.write((const char*)&block, sizeof(block));
+        }
+    }
+
+    fout.close();
 
 #endif
 
@@ -394,7 +425,7 @@ void Stage::SaveAsFile()
 
 void Stage::Save()
 {
-
+#if 0
 // セーブのルーチン
     HANDLE hFile;        //ファイルのハンドル
     hFile = CreateFile(
@@ -433,22 +464,31 @@ void Stage::Save()
 
 
     CloseHandle(hFile);
+#else
+    std::ofstream ofs(fileName_, std::ios_base::out | std::ios_base::binary);
+    //assert(("File open failed", !fout));
+    int block = 0;
+    for (int z = zSize - 1; z >= 0; z--) {
+        for (int x = 0; x < xSize; x++) {
+            ofs.write((const char*)&table_[x][z].height, sizeof(table_[x][z].height));
+            block = table_[x][z].bt;
+            ofs.write((const char*)&block, sizeof(block));
+        }
+    }
+    ofs.close();
+#endif
 }
 
 
 void Stage::Load()
 {
+#if 0
     //「ファイルを保存」ダイアログの設定
     OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
     ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
     ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
-#if 0
     ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")  //─┬ファイルの種類
         TEXT("すべてのファイル(*.*)\0*.*\0\0");             //─┘
-#else
-    ofn.lpstrFilter = TEXT("マップデータ(*.bin)\0*.bin\0")      //─┬ファイルの種類
-    TEXT("すべてのファイル(*.*)\0*.*\0\0");                 //─┘
-#endif
     ofn.lpstrFile = fileName_;               	//ファイル名
     ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
     ofn.Flags = OFN_FILEMUSTEXIST;   		    //フラグ（存在するファイルしか選べない）
@@ -497,7 +537,7 @@ void Stage::Load()
                 index++;
             }
             // バイナリから10進数に変換→table_の該当座標に代入→index増分
-            int sIntH = btoi(sBinH);
+            int sIntH = stoi(sBinH,nullptr,10);
             SetStackBlock(x, z, sIntH);
             index++;
             std::string sBinB = ""; // BlockTypeのバイナリデータ(文字列)を入れる
@@ -505,7 +545,7 @@ void Stage::Load()
                 sBinB += data[index];
                 index++;
             }
-            int sIntB = btoi(sBinB);
+            int sIntB = stoi(sBinB,nullptr,10);
             SetBlock(x, z, (BLOCK_TYPE)sIntB);
             index++;
         }
@@ -513,9 +553,34 @@ void Stage::Load()
     }
 
     CloseHandle(hFile);
-}
+#else
+    //「ファイルを保存」ダイアログの設定
+    OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
+    ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
+    ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
+    ofn.lpstrFilter = TEXT("マップデータ(*.bin)\0*.bin\0")  //─┬ファイルの種類
+        TEXT("すべてのファイル(*.*)\0*.*\0\0");             //─┘
+    ofn.lpstrFile = fileName_;               	//ファイル名
+    ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
+    ofn.Flags = OFN_FILEMUSTEXIST;   		    //フラグ（存在するファイルしか選べない）
+    ofn.lpstrDefExt = "bin";                  	//デフォルト拡張子
 
-unsigned int Stage::btoi(const std::string& _bin)
-{
-    return strtoul(_bin.c_str(), NULL, 2);
+    //「ファイルを保存」ダイアログ
+    BOOL selFile;
+    selFile = GetOpenFileName(&ofn);
+
+    //キャンセルしたら中断
+    if (selFile == FALSE) return;
+
+    std::ifstream ifs(fileName_, std::ios_base::in | std::ios_base::binary);
+    
+    for (int z = zSize - 1; z >= 0; z--) {
+        for (int x = 0; x < xSize; x++) {
+            blockHeight_ = table_[x][z].height;
+            blockType_ = table_[x][z].bt;
+            ifs.read((char*)&blockHeight_, sizeof(blockHeight_));
+            ifs.read((char*)&blockType_, sizeof(blockType_));
+        }
+    }
+#endif
 }
