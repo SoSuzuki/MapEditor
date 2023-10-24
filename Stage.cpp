@@ -4,7 +4,7 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題.bin" },blockHeight_(0),blockType_(0)
+    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題" },blockHeight_(0),blockType_(0)
 {
 }
 
@@ -240,19 +240,16 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 	return FALSE;
 }
 
-void Stage::SizeChange()
+void Stage::SizeChange(HWND _hWnd)
 {
-    //サイズを変更ボタンでテーブルサイズを変えたい
-    //変えるときに、「今までの変更は消えるけど大丈夫？」的な確認用のダイアログを出したいよね
-
     int sizeX = 0, sizeZ = 0;
 
     //「ファイルを保存」ダイアログの設定
-    OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
+    OPENFILENAME ofn;                       	//名前をつけて保存ダイアログの設定用構造体
     ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
     ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
     ofn.lpstrFilter = TEXT("テキストファイル(*.txt)\0*.txt\0")        //─┬ファイルの種類
-        TEXT("すべてのファイル(*.*)\0*.*\0\0");     //─┘
+        TEXT("すべてのファイル(*.*)\0*.*\0\0");                       //─┘
     ofn.lpstrFile = fileName_;               	//ファイル名
     ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
     ofn.Flags = OFN_FILEMUSTEXIST;   		    //フラグ（存在するファイルしか選べない）
@@ -265,9 +262,14 @@ void Stage::SizeChange()
     //キャンセルしたら中断
     if (selFile == FALSE) return;
 
+    //変更を保存せずに続行するか確認 いいえで中断
+    if (MessageBox(_hWnd, "Changes will be lost! Do you want to continue?", "CAUTION!", MB_YESNO) == IDNO) 
+        return;
+
+
     HANDLE hFile;        //ファイルのハンドル
     hFile = CreateFile(
-        "MapSize.txt",              //ファイル名
+        "MapSize.txt",          //ファイル名
         GENERIC_READ,           //アクセスモード（読み込み用）
         0,                      //共有（なし）
         NULL,                   //セキュリティ属性（継承しない）
@@ -300,7 +302,7 @@ void Stage::SizeChange()
     }
     assert(("Error: Not in the specified format!", buffX[0] != ('X'||'x')));
     index++;
-    std::string buffZ = ""; // Xの数値データを入れる
+    std::string buffZ = ""; // Zの数値データを入れる
     while (data[index] != ' ' && data[index] != '\0') {
         buffZ += data[index];
         index++;
@@ -366,12 +368,12 @@ void Stage::SaveAsFile()
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
             if (x != xSize - 1) {
-                ss << std::bitset<8>(table_[x][z].height) << ' ';
-                ss << std::bitset<8>(table_[x][z].bt) << ' ';
+                ss << table_[x][z].height << ' ';
+                ss << table_[x][z].bt << ' ';
             }
             else {
-                ss << std::bitset<8>(table_[x][z].height) << ' ';
-                ss << std::bitset<8>(table_[x][z].bt) << '\n';
+                ss << table_[x][z].height << ' ';
+                ss << table_[x][z].bt << '\n';
             }
         }
     }
@@ -409,19 +411,18 @@ void Stage::SaveAsFile()
     if (selFile == FALSE) return;
 
 
-
-    std::ofstream fout(fileName_, std::ios_base::out | std::ios_base::binary);
-    //assert(("File open failed", !fout));
+    std::ofstream ofs(fileName_, std::ios_base::out | std::ios_base::binary);
+    //assert(("File open failed", !ofs));
     int block = 0;
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
-            fout.write((const char*)&table_[x][z].height,sizeof(table_[x][z].height));
+            ofs.write((const char*)&table_[x][z].height,sizeof(table_[x][z].height));
             block = table_[x][z].bt;
-            fout.write((const char*)&block, sizeof(block));
+            ofs.write((const char*)&block, sizeof(block));
         }
     }
 
-    fout.close();
+    ofs.close();
 
 #endif
 
@@ -446,12 +447,12 @@ void Stage::Save()
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
             if (x != xSize - 1) {
-                ss << std::bitset<8>(table_[x][z].height) << ' ';
-                ss << std::bitset<8>(table_[x][z].bt) << ' ';
+                ss << table_[x][z].height << ' ';
+                ss << table_[x][z].bt << ' ';
             }
             else {
-                ss << std::bitset<8>(table_[x][z].height) << ' ';
-                ss << std::bitset<8>(table_[x][z].bt) << '\n';
+                ss << table_[x][z].height << ' ';
+                ss << table_[x][z].bt << '\n';
             }
         }
     }
@@ -535,21 +536,21 @@ void Stage::Load()
 
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
-            std::string sBinH = ""; // Heightのバイナリデータ(文字列)を入れる
+            std::string strH = ""; // Heightのテキストデータを入れる
             while (data[index] != ' ' && data[index] != '\n') {
-                sBinH += data[index];
+                strH += data[index];
                 index++;
             }
-            // バイナリから10進数に変換→table_の該当座標に代入→index増分
-            int sIntH = stoi(sBinH,nullptr,10);
+            // テキストから10進数に変換→table_の該当座標に代入→index増分
+            int sIntH = stoi(strH,nullptr,10);
             SetStackBlock(x, z, sIntH);
             index++;
-            std::string sBinB = ""; // BlockTypeのバイナリデータ(文字列)を入れる
+            std::string strB = ""; // BlockTypeのテキストデータを入れる
             while (data[index] != ' ' && data[index] != '\n') {
-                sBinB += data[index];
+                strB += data[index];
                 index++;
             }
-            int sIntB = stoi(sBinB,nullptr,10);
+            int sIntB = stoi(strB,nullptr,10);
             SetBlock(x, z, (BLOCK_TYPE)sIntB);
             index++;
         }
@@ -586,5 +587,7 @@ void Stage::Load()
             table_[x][z].bt = (BLOCK_TYPE)blockType_;
         }
     }
+
+    ifs.close();
 #endif
 }

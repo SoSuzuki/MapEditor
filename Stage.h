@@ -86,7 +86,7 @@ public:
     BOOL DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 
     // サイズ変更
-    void SizeChange();
+    void SizeChange(HWND _hWnd);
 
     // 名前を付けて保存
     void SaveAsFile();
