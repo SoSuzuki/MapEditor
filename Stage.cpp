@@ -186,7 +186,12 @@ void Stage::TableSizeChange(int _x, int _z)
     xSize = _x;
     zSize = _z;
 
-    table_.resize(xSize, std::vector<BlockType>(zSize));
+    //table_.resize(xSize, std::vector<BlockType>(zSize));
+    table_.resize(xSize);
+    for (int i = 0; i < _z; i++) {
+        table_[i].resize(zSize);
+    }
+
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
             table_[x][z].bt = DEFAULT;
@@ -312,7 +317,6 @@ void Stage::SizeChange()
     for (int i = 0; i < sizeof(processX); i++) {
         dataX += processX[i];
     }
-    std::stoi(dataX, nullptr, 10);
 
     const char* const processZ = &buffZ[1];
     std::string dataZ = "";
@@ -573,13 +577,13 @@ void Stage::Load()
     if (selFile == FALSE) return;
 
     std::ifstream ifs(fileName_, std::ios_base::in | std::ios_base::binary);
-    
+
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
-            blockHeight_ = table_[x][z].height;
-            blockType_ = table_[x][z].bt;
-            ifs.read((char*)&blockHeight_, sizeof(blockHeight_));
-            ifs.read((char*)&blockType_, sizeof(blockType_));
+            ifs.read((char*)&blockHeight_, sizeof(int));
+            table_[x][z].height = blockHeight_;
+            ifs.read((char*)&blockType_, sizeof(int));
+            table_[x][z].bt = (BLOCK_TYPE)blockType_;
         }
     }
 #endif
