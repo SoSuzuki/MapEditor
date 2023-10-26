@@ -31,6 +31,7 @@ private:
   //int table_[xSize * zSize];  //フロアの座標
     
     char fileName_[MAX_PATH];  //ファイル名を入れる変数
+    char mapSizeName_[MAX_PATH];
 
 #if 0
     struct Stack

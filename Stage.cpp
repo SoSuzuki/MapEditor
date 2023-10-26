@@ -4,7 +4,8 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 },fileName_{ "無題" },blockHeight_(0),blockType_(0)
+    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 }, fileName_{ "無題" }, mapSizeName_{"無題.txt"}, 
+    blockHeight_(0), blockType_(0)
 {
 }
 
@@ -250,7 +251,7 @@ void Stage::SizeChange(HWND _hWnd)
     ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
     ofn.lpstrFilter = TEXT("テキストファイル(*.txt)\0*.txt\0")        //─┬ファイルの種類
         TEXT("すべてのファイル(*.*)\0*.*\0\0");                       //─┘
-    ofn.lpstrFile = fileName_;               	//ファイル名
+    ofn.lpstrFile = mapSizeName_;               	//ファイル名
     ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
     ofn.Flags = OFN_FILEMUSTEXIST;   		    //フラグ（存在するファイルしか選べない）
     ofn.lpstrDefExt = "txt";                  	//デフォルト拡張子
@@ -269,7 +270,7 @@ void Stage::SizeChange(HWND _hWnd)
 
     HANDLE hFile;        //ファイルのハンドル
     hFile = CreateFile(
-        "MapSize.txt",          //ファイル名
+        mapSizeName_,          //ファイル名
         GENERIC_READ,           //アクセスモード（読み込み用）
         0,                      //共有（なし）
         NULL,                   //セキュリティ属性（継承しない）
@@ -579,6 +580,23 @@ void Stage::Load()
     if (selFile == FALSE) return;
 
     std::ifstream ifs(fileName_, std::ios_base::in | std::ios_base::binary);
+
+    // 一番最後まで移動
+    ifs.seekg(0, std::ios_base::end);
+    // 現在のポインタ位置取得
+    int fileSize = ifs.tellg();
+    // 一番先頭に移動
+    ifs.seekg(0, std::ios_base::beg);
+
+    int tableSize = xSize * zSize * sizeof(BlockType);
+    // ファイルサイズと(現在の)テーブルサイズが不一致の場合エラー
+    //assert(("X or Z values do not match", fileSize == tableSize));
+    if (fileSize != tableSize) {
+        int i = MessageBox(0, "X or Z values do not match", 0, MB_OK);
+        if (i == IDOK)
+            return;
+    }
+
 
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
