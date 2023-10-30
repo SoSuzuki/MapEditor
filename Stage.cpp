@@ -4,7 +4,7 @@
 #include "resource.h"
 
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 }, fileName_{ "無題" }, mapSizeName_{"無題.txt"}, 
+    :GameObject(parent, "Stage"), hModel_{ -1,-1,-1,-1,-1 }, fileName_{ "無題.bin" }, mapSizeName_{"無題.txt"}, 
     blockHeight_(0), blockType_(0)
 {
 }
@@ -333,65 +333,6 @@ void Stage::SizeChange(HWND _hWnd)
 
 void Stage::SaveAsFile()
 {
-    
-#if 0
-    //「ファイルを保存」ダイアログの設定
-    OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
-    ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
-    ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
-    ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")      //─┬ファイルの種類
-        TEXT("すべてのファイル(*.*)\0*.*\0\0");                 //─┘
-    ofn.lpstrFile = fileName_;               	//ファイル名
-    ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
-    ofn.Flags = OFN_OVERWRITEPROMPT;   		    //フラグ（同名ファイルが存在したら上書き確認）
-    ofn.lpstrDefExt = "map";                  	//デフォルト拡張子
-
-    //「ファイルを保存」ダイアログ
-    BOOL selFile;
-    selFile = GetSaveFileName(&ofn);
-
-    //キャンセルしたら中断
-    if (selFile == FALSE) return;
-
-    // セーブのルーチン
-    HANDLE hFile;        //ファイルのハンドル
-    hFile = CreateFile(
-        fileName_,              //ファイル名
-        GENERIC_WRITE,          //アクセスモード（書き込み用）
-        0,                      //共有（なし）
-        NULL,                   //セキュリティ属性（継承しない）
-        CREATE_ALWAYS,          //作成方法
-        FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
-        NULL);                  //拡張属性（なし）
-
-    std::stringstream ss;
-
-    for (int z = zSize - 1; z >= 0; z--) {
-        for (int x = 0; x < xSize; x++) {
-            if (x != xSize - 1) {
-                ss << table_[x][z].height << ' ';
-                ss << table_[x][z].bt << ' ';
-            }
-            else {
-                ss << table_[x][z].height << ' ';
-                ss << table_[x][z].bt << '\n';
-            }
-        }
-    }
-
-    std::string s = ss.str();
-
-    DWORD dwBytes = 0;  //書き込み位置
-    WriteFile(
-        hFile,                      //ファイルハンドル
-        s.c_str(),                  //保存するデータ（文字列）
-        (DWORD)strlen(s.c_str()),   //書き込む文字数
-        &dwBytes,                   //書き込んだサイズを入れる変数
-        NULL);                      //オーバーラップド構造体（今回は使わない）
-    
-    CloseHandle(hFile);
-
-#else
     //バイナリ編
     //「ファイルを保存」ダイアログの設定
     OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
@@ -424,53 +365,10 @@ void Stage::SaveAsFile()
     }
 
     ofs.close();
-
-#endif
-
 }
 
 void Stage::Save()
 {
-#if 0
-// セーブのルーチン
-    HANDLE hFile;        //ファイルのハンドル
-    hFile = CreateFile(
-        fileName_,              //ファイル名
-        GENERIC_WRITE,          //アクセスモード（書き込み用）
-        0,                      //共有（なし）
-        NULL,                   //セキュリティ属性（継承しない）
-        CREATE_ALWAYS,          //作成方法
-        FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
-        NULL);                  //拡張属性（なし）
-
-    std::stringstream ss;
-
-    for (int z = zSize - 1; z >= 0; z--) {
-        for (int x = 0; x < xSize; x++) {
-            if (x != xSize - 1) {
-                ss << table_[x][z].height << ' ';
-                ss << table_[x][z].bt << ' ';
-            }
-            else {
-                ss << table_[x][z].height << ' ';
-                ss << table_[x][z].bt << '\n';
-            }
-        }
-    }
-    
-    std::string s = ss.str();
-
-    DWORD dwBytes = 0;  //書き込み位置
-    WriteFile(
-        hFile,                      //ファイルハンドル
-        s.c_str(),                  //保存するデータ（文字列）
-        (DWORD)strlen(s.c_str()),   //書き込む文字数
-        &dwBytes,                   //書き込んだサイズを入れる変数
-        NULL);                      //オーバーラップド構造体（今回は使わない）
-
-
-    CloseHandle(hFile);
-#else
     std::ofstream ofs(fileName_, std::ios_base::out | std::ios_base::binary);
     //assert(("File open failed", !fout));
     int block = 0;
@@ -482,85 +380,11 @@ void Stage::Save()
         }
     }
     ofs.close();
-#endif
 }
 
 
 void Stage::Load()
 {
-    // 現在のTableのサイズとロードするファイルで違う場合、エラーメッセージを出すか余分な場所を切り捨てたい
-#if 0
-    //「ファイルを保存」ダイアログの設定
-    OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
-    ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
-    ofn.lStructSize = sizeof(OPENFILENAME);   	//構造体のサイズ
-    ofn.lpstrFilter = TEXT("マップデータ(*.map)\0*.map\0")  //─┬ファイルの種類
-        TEXT("すべてのファイル(*.*)\0*.*\0\0");             //─┘
-    ofn.lpstrFile = fileName_;               	//ファイル名
-    ofn.nMaxFile = MAX_PATH;               	    //パスの最大文字数
-    ofn.Flags = OFN_FILEMUSTEXIST;   		    //フラグ（存在するファイルしか選べない）
-    ofn.lpstrDefExt = "bin";                  	//デフォルト拡張子
-
-    //「ファイルを保存」ダイアログ
-    BOOL selFile;
-    selFile = GetOpenFileName(&ofn);
-
-    //キャンセルしたら中断
-    if (selFile == FALSE) return;
-    
-    HANDLE hFile;        //ファイルのハンドル
-    hFile = CreateFile(
-        fileName_,              //ファイル名
-        GENERIC_READ,           //アクセスモード（読み込み用）
-        0,                      //共有（なし）
-        NULL,                   //セキュリティ属性（継承しない）
-        OPEN_EXISTING,          //作成方法
-        FILE_ATTRIBUTE_NORMAL,  //属性とフラグ（設定なし）
-        NULL);                  //拡張属性（なし）
-
-    //ファイルのサイズを取得
-    DWORD fileSize = GetFileSize(hFile, NULL);
-
-    //ファイルのサイズ分メモリを確保
-    char* data;
-    data = new char[fileSize];
-
-    DWORD dwBytes = 0; //読み込み位置
-
-    ReadFile(
-        hFile,     //ファイルハンドル
-        data,      //データを入れる変数
-        fileSize,  //読み込むサイズ
-        &dwBytes,  //読み込んだサイズ
-        NULL);     //オーバーラップド構造体（今回は使わない）
-
-    int index = 0; // 読み込んでる現在位置
-
-    for (int z = zSize - 1; z >= 0; z--) {
-        for (int x = 0; x < xSize; x++) {
-            std::string strH = ""; // Heightのテキストデータを入れる
-            while (data[index] != ' ' && data[index] != '\n') {
-                strH += data[index];
-                index++;
-            }
-            // テキストから10進数に変換→table_の該当座標に代入→index増分
-            int sIntH = stoi(strH,nullptr,10);
-            SetStackBlock(x, z, sIntH);
-            index++;
-            std::string strB = ""; // BlockTypeのテキストデータを入れる
-            while (data[index] != ' ' && data[index] != '\n') {
-                strB += data[index];
-                index++;
-            }
-            int sIntB = stoi(strB,nullptr,10);
-            SetBlock(x, z, (BLOCK_TYPE)sIntB);
-            index++;
-        }
-        
-    }
-
-    CloseHandle(hFile);
-#else
     //「ファイルを保存」ダイアログの設定
     OPENFILENAME ofn;                         	//名前をつけて保存ダイアログの設定用構造体
     ZeroMemory(&ofn, sizeof(ofn));            	//構造体初期化
@@ -597,7 +421,6 @@ void Stage::Load()
             return;
     }
 
-
     for (int z = zSize - 1; z >= 0; z--) {
         for (int x = 0; x < xSize; x++) {
             ifs.read((char*)&blockHeight_, sizeof(int));
@@ -608,5 +431,4 @@ void Stage::Load()
     }
 
     ifs.close();
-#endif
 }

@@ -29,18 +29,6 @@ BOOL CALLBACK DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp);
 //エントリーポイント (c++のmain関数みたいなスタート地点)
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow)
 {
-	/*******************テストコード**********************/
-	//Fbx* pFbx = new Fbx;
-	////pFbx->Load("Assets/BoxBrick.fbx");
-	//Fbx::RayCastData data;
-	//data.start = XMFLOAT4(0, 5, 0,0);
-	//data.dir = XMFLOAT4(0, -1, 0, 0);
-	//pFbx->RayCast(data);
-
-	//int a=6;	// レイキャストチェック用
-	//a++;
-	/*****************************************************/
-
 	//ウィンドウクラス（設計図）を作成
 	WNDCLASSEX wc;	//このインスタンスに設計項目を詰め込む
 
@@ -206,18 +194,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			((Stage*)pRootJob->FindObject("Stage"))->SizeChange(hWnd);
 			return 0;
 		case ID_MENU_SAVE_NAME:
-			/*OutputDebugString("New File\n");*/
-			
 			((Stage*)pRootJob->FindObject("Stage"))->SaveAsFile();
 			return 0;
 		case ID_MENU_OPEN:
-			/*OutputDebugString("Open File\n");*/
-			
 			((Stage*)pRootJob->FindObject("Stage"))->Load();
 			return 0;
 		case ID_MENU_SAVE:
-			/*OutputDebugString("Save File\n");*/
-
 			//ファイル保存ダイアログで名前を決める
 			//決めたファイル名でセーブを実行
 			((Stage*)pRootJob->FindObject("Stage"))->Save();
