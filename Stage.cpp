@@ -416,7 +416,7 @@ void Stage::Load()
     // ファイルサイズと(現在の)テーブルサイズが不一致の場合エラー
     //assert(("X or Z values do not match", fileSize == tableSize));
     if (fileSize != tableSize) {
-        int i = MessageBox(0, "X or Z values do not match", 0, MB_OK);
+        int i = MessageBox(0, "X or Z values don't match", 0, MB_OK);
         if (i == IDOK)
             return;
     }
