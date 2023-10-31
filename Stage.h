@@ -2,8 +2,8 @@
 #include <Windows.h>    // プロシージャのために必要
 #include <sstream>
 #include <fstream>
-#include <bitset>
 #include <string>
+#include <vector>
 #include "Engine/GameObject.h"
 #include "Engine/Direct3D.h"
 
@@ -33,13 +33,6 @@ private:
     char fileName_[MAX_PATH];  //ファイル名を入れる変数
     char mapSizeName_[MAX_PATH];
 
-#if 0
-    struct Stack
-    {
-        BLOCK_TYPE bt;
-        int height;
-    }table_[xSize * zSize];
-#else
     struct BlockType
     {
         BLOCK_TYPE bt;
@@ -54,7 +47,7 @@ private:
         BLOCK_DOWN,
         BLOCK_CHANGE,
     };
-#endif
+
     int mode_;  // 0:上げる 1:下げる 2:種類を変える
     int select_;// ブロックの種類
    
