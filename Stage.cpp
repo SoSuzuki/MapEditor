@@ -111,7 +111,7 @@ void Stage::Update()
 
                 Model::RayCast(hModel_[0], data);
 
-                //範囲選択モードが無効なら下の処理、有効なら上の処理に
+                //範囲選択モードが無効なら⑥の処理、有効なら下の処理に
                 if(data.hit) {
                     if(selectCells_.size() < 3) {
                         if (minDist > data.dist) {
