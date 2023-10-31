@@ -111,6 +111,24 @@ void Stage::Update()
 
                 Model::RayCast(hModel_[0], data);
 
+                //範囲選択モードが無効なら下の処理、有効なら上の処理に
+                if(data.hit) {
+                    if(selectCells_.size() < 3) {
+                        if (minDist > data.dist) {
+                            minDist = data.dist;
+                            updateX = x;
+                            updateZ = z;
+                            selectCells_.push_back(MapIndex(updateX, updateZ));
+                        }
+                        data.hit = false;
+                    }
+                    else{
+                        SelectRangeCells(selectCells_[0], selectCells_[1]);
+                    }
+                    isHit = true;
+                    
+                }
+                
                 //⑥ レイが当たったらブレークポイントで止めて確認
                 if (data.hit) {
                     if (minDist > data.dist) {
@@ -139,7 +157,7 @@ void Stage::Update()
     case BLOCK_CHANGE:
         if (isHit)
             table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
-        break;
+        break;  
     default:
         break;
     }
@@ -182,16 +200,37 @@ void Stage::SetStackBlock(int _x, int _z, int _height)
     table_[_x][_z].height = _height;
 }
 
+void Stage::SelectRangeCells(MapIndex _start, MapIndex _end)
+{
+    // ０.範囲選択モードを有効化した際に発動
+
+    // ①レイが当たったセルを２個分保存する(A、Bと仮定)
+    // ②A→B間のセルをListかVectorにリスト化し、保存
+    // ③↑のリストに入ってる座標に対してswich文で各種処理を行う
+
+    for (int z = 0; z < zSize; z++) {
+        for (int x = 0; x < xSize; x++) {
+            if(/*start→endが上方向の場合*/) {
+            }
+            if (/*start→endが右方向の場合*/) {
+
+            }
+            if (/*start→endが下方向の場合*/) {
+
+            }
+            if (/*start→endが左方向の場合*/) {
+
+            }
+        }
+    }
+}
+
 void Stage::TableSizeChange(int _x, int _z)
 {
     xSize = _x;
     zSize = _z;
 
     table_.assign(xSize, std::vector<BlockType>(zSize));
-    //table_.resize(xSize);
-    //for (int i = 0; i < _z; i++) {
-    //    table_[i].resize(zSize);
-    //}
 
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
