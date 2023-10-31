@@ -34,7 +34,7 @@ void Stage::Initialize()
     }
     
     // tableにブロックのタイプをセット
-    table_.resize(xSize, std::vector<BlockType>(zSize));
+    table_.assign(xSize, std::vector<BlockType>(zSize));
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
             table_[x][z].bt = DEFAULT;
@@ -187,11 +187,11 @@ void Stage::TableSizeChange(int _x, int _z)
     xSize = _x;
     zSize = _z;
 
-    //table_.resize(xSize, std::vector<BlockType>(zSize));
-    table_.resize(xSize);
-    for (int i = 0; i < _z; i++) {
-        table_[i].resize(zSize);
-    }
+    table_.assign(xSize, std::vector<BlockType>(zSize));
+    //table_.resize(xSize);
+    //for (int i = 0; i < _z; i++) {
+    //    table_[i].resize(zSize);
+    //}
 
     for (int x = 0; x < xSize; x++) {
         for (int z = 0; z < zSize; z++) {
