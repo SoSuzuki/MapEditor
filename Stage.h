@@ -49,7 +49,8 @@ private:
 
     int mode_;  // 0:上げる 1:下げる 2:種類を変える
     int select_;// ブロックの種類
-    
+    bool isCheckSelectRange_;    // 範囲選択モードにチェックが入ってるかどうか
+
     struct MapIndex {
         int x;
         int z;

@@ -95,72 +95,114 @@ void Stage::Update()
     int updateX = 0, updateZ = 0;
     bool isHit = false;
 
-    for (int x = 0; x < xSize; x++) {
-        for (int z = 0; z < zSize; z++) {
-            for (int y = 0; y < table_[x][z].height + 1; y++) {
-                RayCastData data;
-                data.hit = false;
-                XMStoreFloat4(&data.start, vMouseFront);
-                XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
-                Transform trans;
-                trans.position_.x = x;
-                trans.position_.z = z;
-                trans.position_.y = y;
-                    
-                Model::SetTransform(hModel_[0], trans);
+    if (isCheckSelectRange_) {
+        for (int x = 0; x < xSize; x++) {
+            for (int z = 0; z < zSize; z++) {
+                for (int y = 0; y < table_[x][z].height + 1; y++) {
+                    RayCastData data;
+                    data.hit = false;
+                    XMStoreFloat4(&data.start, vMouseFront);
+                    XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
+                    Transform trans;
+                    trans.position_.x = x;
+                    trans.position_.z = z;
+                    trans.position_.y = y;
 
-                Model::RayCast(hModel_[0], data);
+                    Model::SetTransform(hModel_[0], trans);
 
-                //範囲選択モードが無効なら⑥の処理、有効なら下の処理に
-                if(data.hit) {
-                    if(selectCells_.size() < 3) {
+                    Model::RayCast(hModel_[0], data);
+
+                    //⑥ レイが当たったらブレークポイントで止めて確認
+                    if (data.hit) {
+                        if (selectCells_.size() < 3) {
+                            if (minDist > data.dist) {
+                                minDist = data.dist;
+                                updateX = x;
+                                updateZ = z;
+                                selectCells_.push_back(MapIndex(updateX, updateZ));
+                            }
+                            data.hit = false;
+                        }
+                        SelectRangeCells(selectCells_[0], selectCells_[1]);
+                        isHit = true;
+
+                    }
+                }
+            }
+        }
+
+        //switch (mode_)
+        //{
+        //case BLOCK_UP:
+        //    if (isHit)
+        //        table_[updateX][updateZ].height++;
+        //    break;
+        //case BLOCK_DOWN:
+        //    if (isHit)
+        //        if (table_[updateX][updateZ].height > 0)
+        //            table_[updateX][updateZ].height--;
+        //    break;
+        //case BLOCK_CHANGE:
+        //    if (isHit)
+        //        table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
+        //    break;
+        //default:
+        //    break;
+        //}
+    }
+    else {
+        for (int x = 0; x < xSize; x++) {
+            for (int z = 0; z < zSize; z++) {
+                for (int y = 0; y < table_[x][z].height + 1; y++) {
+                    RayCastData data;
+                    data.hit = false;
+                    XMStoreFloat4(&data.start, vMouseFront);
+                    XMStoreFloat4(&data.dir, vMouseBack - vMouseFront);
+                    Transform trans;
+                    trans.position_.x = x;
+                    trans.position_.z = z;
+                    trans.position_.y = y;
+
+                    Model::SetTransform(hModel_[0], trans);
+
+                    Model::RayCast(hModel_[0], data);
+
+                    //⑥ レイが当たったらブレークポイントで止めて確認
+                    if (data.hit) {
                         if (minDist > data.dist) {
                             minDist = data.dist;
                             updateX = x;
                             updateZ = z;
-                            selectCells_.push_back(MapIndex(updateX, updateZ));
                         }
                         data.hit = false;
+                        isHit = true;
                     }
-                    else{
-                        SelectRangeCells(selectCells_[0], selectCells_[1]);
-                    }
-                    isHit = true;
-                    
-                }
-                
-                //⑥ レイが当たったらブレークポイントで止めて確認
-                if (data.hit) {
-                    if (minDist > data.dist) {
-                        minDist = data.dist;
-                        updateX = x;
-                        updateZ = z;
-                    }
-                    data.hit = false;
-                    isHit = true;
+
                 }
             }
         }
+
+        switch (mode_)
+        {
+        case BLOCK_UP:
+            if (isHit)
+                table_[updateX][updateZ].height++;
+            break;
+        case BLOCK_DOWN:
+            if (isHit)
+                if (table_[updateX][updateZ].height > 0)
+                    table_[updateX][updateZ].height--;
+            break;
+        case BLOCK_CHANGE:
+            if (isHit)
+                table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
+            break;
+        default:
+            break;
+        }
     }
 
-    switch (mode_)
-    {
-    case BLOCK_UP:
-        if (isHit)
-            table_[updateX][updateZ].height++;
-        break;
-    case BLOCK_DOWN:
-        if (isHit)
-            if (table_[updateX][updateZ].height > 0)
-                table_[updateX][updateZ].height--;
-        break;
-    case BLOCK_CHANGE:
-        if (isHit)
-            table_[updateX][updateZ].bt = (BLOCK_TYPE)hModel_[select_];
-        break;  
-    default:
-        break;
-    }
+    
 
     
 }
@@ -204,21 +246,22 @@ void Stage::SelectRangeCells(MapIndex _start, MapIndex _end)
 {
     // ０.範囲選択モードを有効化した際に発動
 
-    // ①レイが当たったセルを２個分保存する(A、Bと仮定)
+    // ①レイが当たったセルを２個分保存する(A、Bと仮定) => Update関数内で行うことに
     // ②A→B間のセルをListかVectorにリスト化し、保存
     // ③↑のリストに入ってる座標に対してswich文で各種処理を行う
 
     for (int z = 0; z < zSize; z++) {
         for (int x = 0; x < xSize; x++) {
-            if(/*start→endが上方向の場合*/) {
-            }
-            if (/*start→endが右方向の場合*/) {
+            if(/*start→endが上方向の場合*/isCheckSelectRange_) {
 
             }
-            if (/*start→endが下方向の場合*/) {
+            if (/*start→endが右方向の場合*/isCheckSelectRange_) {
 
             }
-            if (/*start→endが左方向の場合*/) {
+            if (/*start→endが下方向の場合*/isCheckSelectRange_) {
+
+            }
+            if (/*start→endが左方向の場合*/isCheckSelectRange_) {
 
             }
         }
@@ -252,6 +295,9 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 		// ラジオボタンの初期値
 		SendMessage(GetDlgItem(hDlg, IDC_RADIO_UP), BM_SETCHECK, BST_CHECKED, 0);
 
+        // チェックボックスの初期値
+        SendMessage(GetDlgItem(hDlg, IDC_CHECK_RANGE), BM_SETCHECK, BST_UNCHECKED, 0);
+
 		// コンボボックスの初期値
 		for (int i = 0; i < BLOCK_TYPE::BLOCK_MAX; i++) {
 			SendMessage(GetDlgItem(hDlg, IDC_COMBO_GROUND), CB_ADDSTRING, 0, (LPARAM)blockName[i]);
@@ -274,7 +320,12 @@ BOOL Stage::DialogProc(HWND hDlg, UINT msg, WPARAM wp, LPARAM lp)
 			mode_ = BLOCK_CHANGE;
             return TRUE;
 		}
-
+        
+        // チェックボックス
+        if (IsDlgButtonChecked(hDlg, IDC_CHECK_RANGE)) {
+            isCheckSelectRange_ = SendMessage(GetDlgItem(hDlg, IDC_CHECK_RANGE), BM_GETCHECK, 0, 0);
+            return TRUE;
+        }
 		return TRUE;
 	}
 	return FALSE;

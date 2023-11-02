@@ -5,10 +5,10 @@
 #define IDD_DIALOG1                     101
 #define IDR_MENU1                       103
 #define IDC_RADIO_UP                    1002
-#define IDC_COMBO1                      1004
 #define IDC_COMBO_GROUND                1004
 #define IDC_RADIO_DOWN                  1009
 #define IDC_RADIO_CHANGE                1010
+#define IDC_CHECK_RANGE                 1017
 #define ID_40001                        40001
 #define ID_40002                        40002
 #define ID_40003                        40003
@@ -24,7 +24,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        108
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1017
+#define _APS_NEXT_CONTROL_VALUE         1018
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
